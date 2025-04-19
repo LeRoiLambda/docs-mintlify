@@ -1,0 +1,146 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Charge",
+  "colors": {
+    "primary": "#1fa04b",
+    "light": "#1fa04b",
+    "dark": "#0D9373"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "anchors": [
+      {
+        "anchor": "Documentation",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              {
+                "group": "Account",
+                "pages": [
+                  "create-a-account"
+                ]
+              },
+              {
+                "group": "Fleet",
+                "pages": [
+                  "create-a-fleet"
+                ]
+              },
+              {
+                "group": "Driver",
+                "pages": [
+                  "create-a-driver"
+                ]
+              },
+              {
+                "group": "Vehicle",
+                "pages": [
+                  "create-a-vehicle"
+                ]
+              },
+              {
+                "group": "Vehicle Telemetry",
+                "pages": [
+                  "create-a-vehicle-telemetrie"
+                ]
+              },
+              {
+                "group": "Charging Station",
+                "pages": [
+                  "create-a-charging-station"
+                ]
+              },
+              {
+                "group": "Charging Session",
+                "pages": [
+                  "create-a-charging-session"
+                ]
+              },
+              {
+                "group": "Transaction",
+                "pages": [
+                  "create-a-transaction"
+                ]
+              },
+              {
+                "group": "Invoice",
+                "pages": [
+                  "create-a-invoice"
+                ]
+              },
+              {
+                "group": "Report",
+                "pages": [
+                  "create-a-report"
+                ]
+              },
+              {
+                "group": "Reservation",
+                "pages": [
+                  "create-a-reservation"
+                ]
+              },
+              {
+                "group": "Payment Method",
+                "pages": [
+                  "create-a-payment-method"
+                ]
+              },
+              {
+                "group": "Estimation",
+                "pages": [
+                  "create-a-estimation"
+                ]
+              },
+              {
+                "group": "Webhook",
+                "pages": [
+                  "create-a-webhook-endpoint"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Blog",
+          "href": "https://chargeapi.co/blog",
+          "icon": "newspaper"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "https://chargeapi.co/public/img/logo.png",
+    "dark": "https://chargeapi.co/public/img/logo-white.png",
+    "href": "https://chargeapi.co"
+  },
+  "appearance": {
+    "default": "light"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Contact",
+        "href": "https://chargeapi.co/contact"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get API Keys",
+      "href": "https://chargeapi.co/signup"
+    }
+  },
+  "footer": {
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/chargeapi"
+    }
+  }
+}

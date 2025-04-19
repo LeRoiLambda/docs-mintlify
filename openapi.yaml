@@ -1,0 +1,1776 @@
+openapi: 3.0.0
+info:
+  title: Charge API
+  version: 1.0.0
+  description: >
+    The Charge API enables platforms, fleets, and developers to manage EV charging sessions,
+    vehicles, drivers, payments, and infrastructure through a single unified interface.
+
+servers:
+  - url: https://api.chargeapi.co/v1
+
+paths:
+  /accounts:
+    post:
+      summary: Create a account
+      operationId: createAccount
+      responses:
+        "200":
+          description: A newly created account.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+  /fleets:
+    post:
+      summary: Create a fleet
+      operationId: createFleet
+      responses:
+        "200":
+          description: A newly created fleet.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fleet"
+  /drivers:
+    post:
+      summary: Create a driver
+      operationId: createDriver
+      responses:
+        "200":
+          description: A newly created driver.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Driver"
+  /vehicles:
+    post:
+      summary: Create a vehicle
+      operationId: createVehicle
+      responses:
+        "200":
+          description: A newly created vehicle.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+  /vehicle_telemetries:
+    post:
+      summary: Create a vehicle telemetrie
+      operationId: createVehicleTelemetrie
+      responses:
+        "200":
+          description: A newly created vehicle_telemetrie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleTelemetrie"
+  /charging_stations:
+    post:
+      summary: Create a charging station
+      operationId: createChargingStation
+      responses:
+        "200":
+          description: A newly created charging_station.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChargingStation"
+  /charging_sessions:
+    post:
+      summary: Create a charging session
+      operationId: createChargingSession
+      responses:
+        "200":
+          description: A newly created charging_session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChargingSession"
+  /transactions:
+    post:
+      summary: Create a transaction
+      operationId: createTransaction
+      responses:
+        "200":
+          description: A newly created transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+  /invoices:
+    post:
+      summary: Create a invoice
+      operationId: createInvoice
+      responses:
+        "200":
+          description: A newly created invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+  /reports:
+    post:
+      summary: Create a report
+      operationId: createReport
+      responses:
+        "200":
+          description: A newly created report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+  /reservations:
+    post:
+      summary: Create a reservation
+      operationId: createReservation
+      responses:
+        "200":
+          description: A newly created reservation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reservation"
+  /webhook_endpoints:
+    post:
+      summary: Create a webhook endpoint
+      operationId: createWebhookEndpoint
+      responses:
+        "200":
+          description: A newly created webhook_endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookEndpoint"
+  /payment_methods:
+    post:
+      summary: Create a payment method
+      operationId: createPaymentMethod
+      responses:
+        "200":
+          description: A newly created payment_method.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+  /estimations:
+    post:
+      summary: Create a estimation
+      operationId: createEstimation
+      responses:
+        "200":
+          description: A newly created estimation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Estimation"
+
+components:
+  schemas:
+    Account:
+      type: object
+      description: >
+        An Account represents a customer or organization using Charge. This may be a fleet, a mobility platform, or any entity managing vehicles, payments, and charging activity through the Charge API.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the account object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `account`.
+          example: null
+
+        business_type:
+          type: string
+          nullable: true
+          description: Type of legal entity associated with the account (e.g., individual, business).
+          example: null
+
+        billing_details:
+          type: object
+          description: Billing information used for invoicing and reports.
+          properties:
+            billing_address:
+              type: object
+              description: Physical address used for billing purposes.
+              properties:
+                city:
+                  type: string
+                  example: null
+                  description: City, district, suburb, or town.
+                country:
+                  type: string
+                  example: null
+                  description: Two-letter ISO country code.
+                line1:
+                  type: string
+                  example: null
+                  description: First line of the address.
+                line2:
+                  type: string
+                  example: null
+                  description: Second line of the address (optional).
+                postal_code:
+                  type: string
+                  example: null
+                  description: ZIP or postal code.
+                state:
+                  type: string
+                  example: null
+                  description: State, county, province, or region.
+
+        contact:
+          type: object
+          description: Primary contact person for the account.
+          properties:
+            email:
+              type: string
+              example: null
+              description: Contact email address.
+            name:
+              type: string
+              example: null
+              description: Full name of the contact person.
+            phone:
+              type: string
+              example: null
+              description: Phone number for contact.
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the account was created (UNIX timestamp).
+          example: null
+
+        default_currency:
+          type: string
+          description: Three-letter ISO currency code for default billing and pricing (e.g., `usd`).
+          example: null
+
+        description:
+          type: string
+          nullable: true
+          description: Optional internal description or label for the account.
+          example: null
+
+        email:
+          type: string
+          nullable: true
+          description: Email address associated with the account (may duplicate contact.email).
+          example: null
+
+        metadata:
+          type: object
+          description: Set of key-value pairs to store custom structured data.
+          example: null
+
+        metric_system:
+          type: string
+          nullable: true
+          description: Preferred measurement system. Either `metric` or `imperial`.
+          example: null
+
+        name:
+          type: string
+          nullable: true
+          description: Display name or registered name of the account.
+          example: null
+
+        preferences:
+          type: object
+          description: Account-level preferences for billing, notifications, and reports.
+          properties:
+            billing_cycle:
+              type: string
+              description: Billing cycle preference (`monthly`, `weekly`, etc.).
+              example: null
+            charging_notifications:
+              type: boolean
+              description: Whether the account receives charging session notifications.
+              example: null
+            default_currency:
+              type: string
+              description: Preferred default currency code.
+              example: null
+            default_payment_method:
+              type: string
+              nullable: true
+              description: ID of the default payment method used for billing.
+              example: null
+            reporting_enabled:
+              type: boolean
+              description: Whether reporting is enabled for the account.
+              example: null
+            report_frequency:
+              type: string
+              description: Frequency of scheduled reports (e.g., `weekly`, `monthly`).
+              example: null
+
+        registration_number:
+          type: string
+          nullable: true
+          description: Government-issued registration number (for businesses).
+          example: null
+
+        type:
+          type: string
+          description: Type of account, such as `individual` or `business`.
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the account was last updated (UNIX timestamp).
+          example: null
+
+        wallet_balance:
+          type: integer
+          description: Current account wallet balance in the smallest currency unit (e.g., cents).
+          example: null
+
+    Fleet:
+      type: object
+      description: >
+        A Fleet represents a group of vehicles and drivers managed under a single operational unit.
+        Fleets are commonly used by logistics providers, delivery networks, or enterprise customers
+        to organize charging activity, billing, and reporting by group.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the fleet object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `fleet`.
+          example: null
+
+        address:
+          type: object
+          description: Physical address associated with the fleet’s headquarters or billing location.
+          properties:
+            city:
+              type: string
+              description: City, district, or town.
+              example: null
+            country:
+              type: string
+              description: Two-letter ISO country code.
+              example: null
+            line1:
+              type: string
+              description: First line of the street address.
+              example: null
+            line2:
+              type: string
+              description: Second line of the address (optional).
+              example: null
+            postal_code:
+              type: string
+              description: ZIP or postal code.
+              example: null
+            state:
+              type: string
+              description: State, province, or region.
+              example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the fleet was created (UNIX timestamp).
+          example: null
+
+        currency:
+          type: string
+          description: Three-letter ISO currency code used for this fleet (e.g., `usd`).
+          example: null
+
+        description:
+          type: string
+          nullable: true
+          description: Optional internal description of the fleet.
+          example: null
+
+        email:
+          type: string
+          nullable: true
+          description: Contact email associated with the fleet.
+          example: null
+
+        metric_system:
+          type: string
+          enum: [international_system, us_customary_system, imperial_system]
+          description: Unit system preferred for reports and distance/energy formats.
+          example: null
+
+        name:
+          type: string
+          description: Human-readable name of the fleet.
+          example: null
+
+        phone:
+          type: string
+          nullable: true
+          description: Optional phone number associated with the fleet.
+          example: null
+
+        plan:
+          type: string
+          description: Subscription or feature plan assigned to the fleet (e.g., `professional`).
+          example: null
+
+        preferences:
+          type: object
+          description: Account-level settings related to billing, reporting, and charging activity.
+          properties:
+            billing_cycle:
+              type: string
+              description: Frequency of billing for the fleet (`monthly`, `weekly`, etc.).
+              example: null
+            charging_notifications:
+              type: boolean
+              description: Whether drivers in this fleet receive session status notifications.
+              example: null
+            default_currency:
+              type: string
+              description: Preferred currency for cost estimates and billing.
+              example: null
+            default_payment_method:
+              type: string
+              description: ID of the default payment method to use for charging sessions.
+              example: null
+            report_frequency:
+              type: string
+              description: Frequency of automated report delivery (`weekly`, `monthly`, etc.).
+              example: null
+
+        status:
+          type: string
+          enum: [active, suspended, archived]
+          description: Current operational status of the fleet.
+          example: null
+
+        timezone:
+          type: string
+          description: IANA timezone identifier used for reporting and scheduling (e.g., `Etc/UTC`).
+          example: null
+
+        total_drivers:
+          type: integer
+          description: Number of drivers currently assigned to this fleet.
+          example: null
+
+        total_vehicles:
+          type: integer
+          description: Number of vehicles currently assigned to this fleet.
+          example: null
+
+        total_energy_consumed_kwh:
+          type: number
+          format: float
+          description: Total historical energy consumed by the fleet across all sessions (in kWh).
+          example: null
+
+        total_sessions:
+          type: integer
+          description: Total number of charging sessions completed by the fleet.
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the fleet object was last updated.
+          example: null
+
+        wallet_balance:
+          type: integer
+          description: Fleet's current wallet or prepaid balance in the smallest currency unit (e.g., cents).
+          example: null
+
+    Driver:
+      type: object
+      description: >
+        A Driver represents an individual authorized to initiate and manage charging sessions.
+        Drivers are typically associated with a fleet or account and are assigned to one or more vehicles.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the driver object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `driver`.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the driver was created (UNIX timestamp).
+          example: null
+
+        email:
+          type: string
+          description: Email address used for login and notifications.
+          example: null
+
+        license_number:
+          type: string
+          nullable: true
+          description: Driver’s license number, if applicable.
+          example: null
+
+        name:
+          type: string
+          description: Full name of the driver.
+          example: null
+
+        phone:
+          type: string
+          nullable: true
+          description: Optional phone number for communication and account recovery.
+          example: null
+
+        preferences:
+          type: object
+          description: Driver’s personal preferences for charging experience and routing.
+          properties:
+            charging_speed:
+              type: string
+              description: Preferred charging speed (e.g., `slow`, `fast`, `ultrafast`).
+              example: null
+            charging_notifications:
+              type: boolean
+              description: Whether to receive notifications about charging status and session progress.
+              example: null
+            currency:
+              type: string
+              description: Preferred currency for cost display and billing.
+              example: null
+            payment_method:
+              type: string
+              nullable: true
+              description: Default payment method ID assigned to the driver.
+              example: null
+            max_price_per_kwh:
+              type: number
+              nullable: true
+              description: Optional upper limit on acceptable charging price (in currency unit per kWh).
+              example: null
+            preferred_cpos:
+              type: array
+              items:
+                type: string
+              description: List of preferred charging network (CPO) IDs.
+              example: null
+            preferred_stations:
+              type: array
+              items:
+                type: string
+              description: List of preferred charging station IDs.
+              example: null
+
+        status:
+          type: string
+          enum: [active, suspended, archived]
+          description: Current status of the driver account.
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the driver object was last updated.
+          example: null
+
+        vehicles:
+          type: array
+          items:
+            type: string
+          description: List of vehicle IDs currently linked to the driver.
+          example: null
+
+        wallet_balance:
+          type: integer
+          description: Driver’s wallet or prepaid balance in the smallest currency unit (e.g., cents).
+          example: null
+
+    Vehicle:
+      type: object
+      description: >
+        A Vehicle represents an electric vehicle registered within the Charge platform.
+        Vehicles can be linked to one or more drivers, and are used to associate charging sessions,
+        telemetry data, and battery specifications.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the vehicle object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `vehicle`.
+          example: null
+
+        battery_capacity:
+          type: integer
+          description: Total battery capacity of the vehicle in watt-hours (Wh).
+          example: null
+
+        charging_standard:
+          type: string
+          description: Standard used for charging the vehicle (e.g., `CCS`, `CHAdeMO`, `Type2`).
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the vehicle was registered (UNIX timestamp).
+          example: null
+
+        drivers:
+          type: array
+          items:
+            type: string
+          description: List of driver IDs currently linked to the vehicle.
+          example: null
+
+        information:
+          type: object
+          description: Manufacturer details for the vehicle.
+          properties:
+            make:
+              type: string
+              description: Vehicle manufacturer or brand (e.g., Tesla, BMW).
+              example: null
+            model:
+              type: string
+              description: Model name of the vehicle.
+              example: null
+            year:
+              type: string
+              description: Model year of the vehicle.
+              example: null
+
+        metadata:
+          type: object
+          description: Set of key-value pairs for storing custom structured data about the vehicle.
+          example: null
+
+        registration_plate:
+          type: string
+          description: License plate or vehicle registration number.
+          example: null
+
+        status:
+          type: string
+          enum: [active, inactive, retired]
+          description: Current lifecycle status of the vehicle.
+          example: null
+
+        telemetry:
+          type: string
+          description: ID of the telemetry object linked to this vehicle (if any).
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the vehicle object was last updated.
+          example: null
+
+        vin:
+          type: string
+          description: Vehicle Identification Number (VIN), used to uniquely identify the vehicle.
+          example: null
+
+    VehicleTelemetry:
+      type: object
+      description: >
+        VehicleTelemetry provides real-time insights from a connected electric vehicle,
+        including battery status, location, firmware version, and odometer readings.
+        It is linked to a registered vehicle and regularly updated.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the telemetry object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `vehicle_telemetry`.
+          example: null
+
+        vehicle:
+          type: string
+          description: ID of the vehicle this telemetry data belongs to.
+          example: null
+
+        battery:
+          type: object
+          description: Battery-level telemetry including state of charge and range.
+          properties:
+            capacity:
+              type: integer
+              nullable: true
+              description: Battery capacity in watt-hours (Wh).
+              example: null
+            level:
+              type: integer
+              description: Battery charge level as a percentage (0–100).
+              example: null
+            range:
+              type: integer
+              description: Estimated remaining driving range in meters.
+              example: null
+            status:
+              type: string
+              description: Charging status (e.g., `charging`, `not_charging`, `idle`).
+              example: null
+            temperature:
+              type: number
+              nullable: true
+              description: Measured battery temperature in Celsius.
+              example: null
+            updated:
+              type: integer
+              format: unix-time
+              description: Time at which the battery telemetry was last updated.
+              example: null
+
+        firmware_version:
+          type: string
+          description: Firmware version currently running on the vehicle.
+          example: null
+
+        location:
+          type: object
+          description: Real-time geographic position of the vehicle.
+          properties:
+            latitude:
+              type: number
+              format: float
+              description: Latitude component of the GPS position.
+              example: null
+            longitude:
+              type: number
+              format: float
+              description: Longitude component of the GPS position.
+              example: null
+            updated:
+              type: integer
+              format: unix-time
+              description: Time at which the location was last updated.
+              example: null
+
+        odometer:
+          type: object
+          description: Most recent odometer reading reported by the vehicle.
+          properties:
+            unit:
+              type: string
+              enum: [KMS, MILES]
+              description: Unit of measurement for the odometer value.
+              example: null
+            value:
+              type: integer
+              description: Total distance driven by the vehicle.
+              example: null
+            updated:
+              type: integer
+              format: unix-time
+              description: Time at which the odometer was last updated.
+              example: null
+
+    ChargingStation:
+      type: object
+      description: >
+        A Charging Station represents a physical location where electric vehicles can connect and charge.
+        It includes both static attributes (location, capabilities) and dynamic data such as real-time
+        connector availability and pricing.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the charging station object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `charging_station`.
+          example: null
+
+        address:
+          type: object
+          description: Physical location of the charging station.
+          properties:
+            city:
+              type: string
+              description: City, town, or district where the station is located.
+              example: null
+            country:
+              type: string
+              description: Two-letter ISO country code (e.g., `US`, `FR`).
+              example: null
+            line1:
+              type: string
+              description: First line of the street address.
+              example: null
+            line2:
+              type: string
+              description: Second line of the address (optional).
+              example: null
+            postal_code:
+              type: string
+              description: ZIP or postal code.
+              example: null
+            state:
+              type: string
+              description: State, province, or administrative region.
+              example: null
+
+        availability:
+          type: object
+          description: Real-time and forecasted availability data for the station.
+          properties:
+            connectors_total:
+              type: integer
+              description: Total number of connectors at this station.
+              example: null
+            connectors_available:
+              type: integer
+              description: Number of connectors currently available for use.
+              example: null
+            opening_hours:
+              type: array
+              description: Weekly operating hours of the station, if not 24/7.
+              items:
+                type: object
+                properties:
+                  day:
+                    type: string
+                    description: Day of the week (e.g., `mon`, `sun`).
+                    example: null
+                  from:
+                    type: string
+                    description: Start time in 24h format (e.g., `08:00`).
+                    example: null
+                  until:
+                    type: string
+                    description: End time in 24h format (e.g., `20:00`).
+                    example: null
+            range:
+              type: array
+              description: Future time ranges when at least one connector will be available.
+              items:
+                type: object
+                properties:
+                  from:
+                    type: integer
+                    format: unix-time
+                    description: Start of the availability window.
+                    example: null
+                  until:
+                    type: integer
+                    format: unix-time
+                    description: End of the availability window.
+                    example: null
+
+        capabilities:
+          type: object
+          description: Capabilities and service features provided at the station.
+          properties:
+            24_7_access:
+              type: boolean
+              description: Indicates if the station is accessible 24/7.
+              example: null
+            amenities:
+              type: array
+              items:
+                type: string
+              description: List of amenities offered (e.g., `cafe`, `restrooms`, `wifi`).
+              example: null
+            payment_methods:
+              type: array
+              items:
+                type: string
+              description: Accepted payment methods (e.g., `credit_card`, `rfid`).
+              example: null
+            requires_membership:
+              type: boolean
+              description: Whether a membership is required to use this station.
+              example: null
+            reservable:
+              type: boolean
+              description: Indicates if the station supports reservations.
+              example: null
+
+        connectors:
+          type: array
+          description: List of connectors available at the station.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Unique identifier for the connector.
+                example: null
+              object:
+                type: string
+                description: Always `connector`.
+                example: null
+              power:
+                type: integer
+                description: Maximum power output in kW.
+                example: null
+              status:
+                type: string
+                description: Current status of the connector (e.g., `available`, `occupied`).
+                example: null
+              type:
+                type: string
+                description: Connector type or types supported (e.g., `CHAdeMO`, `CCS`).
+                example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the charging station was created.
+          example: null
+
+        location:
+          type: object
+          description: GPS coordinates of the station.
+          properties:
+            latitude:
+              type: number
+              format: float
+              description: Latitude of the charging station.
+              example: null
+            longitude:
+              type: number
+              format: float
+              description: Longitude of the charging station.
+              example: null
+
+        information:
+          type: object
+          description: Metadata about the operator or network that manages the station.
+          properties:
+            network_name:
+              type: string
+              description: Name of the network providing this station.
+              example: null
+            operator_name:
+              type: string
+              description: Name of the company operating the station.
+              example: null
+            operator_contact:
+              type: string
+              description: Contact information for station support or issues.
+              example: null
+
+        name:
+          type: string
+          nullable: true
+          description: Optional user-facing name for the station.
+          example: null
+
+        pricing:
+          type: array
+          description: Pricing components applicable at this station.
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Type of price component (e.g., `ENERGY`, `FLAT`, `PARKING_TIME`, `FEE`, `TAX`).
+                example: null
+              currency:
+                type: string
+                description: Currency code in ISO 4217 format (e.g., `usd`).
+                example: null
+              tax:
+                type: string
+                description: Currency or tax label associated with the component.
+                example: null
+              price:
+                type: integer
+                description: Price in the smallest currency unit (e.g., cents).
+                example: null
+              step_size:
+                type: integer
+                description: Billing increment step for this price component.
+                example: null
+
+        status:
+          type: string
+          description: Current status of the station (e.g., `available`, `occupied`, `maintenance`).
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the station was last updated.
+          example: null
+
+    ChargingSession:
+      type: object
+      description: >
+        A Charging Session represents a real-time or completed EV charging event.
+        It tracks the energy consumed, session duration, billing information, and associations
+        to a driver, vehicle, charging station, and connector.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the charging session object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `charging_session`.
+          example: null
+
+        amount_due:
+          type: integer
+          description: Total cost of the charging session, in the smallest currency unit (e.g., cents).
+          example: null
+
+        authorization:
+          type: string
+          nullable: true
+          description: ID of the authorization or token used to initiate the session, if applicable.
+          example: null
+
+        charging_station:
+          type: string
+          description: ID of the charging station where the session occurred.
+          example: null
+
+        connector:
+          type: string
+          description: ID of the specific connector used during the session.
+          example: null
+
+        country:
+          type: string
+          nullable: true
+          description: Country code (ISO 3166-1 alpha-2) where the session took place.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time when the charging session was created or initialized.
+          example: null
+
+        currency:
+          type: string
+          description: ISO 4217 three-letter currency code (e.g., `usd`).
+          example: null
+
+        driver:
+          type: string
+          description: ID of the driver who initiated the session.
+          example: null
+
+        energy_consumed:
+          type: integer
+          description: Amount of energy delivered during the session, in watt-hours (Wh).
+          example: null
+
+        fleet:
+          type: string
+          description: ID of the fleet the driver or session is associated with.
+          example: null
+
+        payment_method:
+          type: string
+          description: ID of the payment method used to pay for the session.
+          example: null
+
+        session_ended:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Time at which the charging session ended, if completed.
+          example: null
+
+        session_started:
+          type: integer
+          format: unix-time
+          description: Time when the session began and charging started.
+          example: null
+
+        status:
+          type: string
+          enum: [active, completed, cancelled, failed]
+          description: Current status of the session.
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the session was last updated.
+          example: null
+
+    Transaction:
+      type: object
+      description: >
+        A Transaction represents a finalized financial event related to a charging session,
+        such as a charge, refund, or adjustment. Transactions are linked to a driver, session,
+        and payment method.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the transaction object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `transaction`.
+          example: null
+
+        amount:
+          type: integer
+          description: Total amount of the transaction in the smallest currency unit (e.g., cents).
+          example: null
+
+        charging_session:
+          type: string
+          description: ID of the charging session associated with this transaction.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the transaction was created.
+          example: null
+
+        currency:
+          type: string
+          description: ISO 4217 currency code used for this transaction (e.g., `usd`).
+          example: null
+
+        description:
+          type: string
+          nullable: true
+          description: Optional human-readable description of the transaction.
+          example: null
+
+        driver:
+          type: string
+          description: ID of the driver associated with the transaction.
+          example: null
+
+        payment_method:
+          type: string
+          description: ID of the payment method used for the transaction.
+          example: null
+
+        status:
+          type: string
+          enum: [succeeded, failed, pending]
+          description: Current status of the transaction.
+          example: null
+
+        type:
+          type: string
+          enum: [charge, refund, adjustment]
+          description: Type of financial event recorded (e.g., `charge`, `refund`).
+          example: null
+
+        vehicle:
+          type: string
+          description: ID of the vehicle linked to the transaction.
+          example: null
+
+    Invoice:
+      type: object
+      description: >
+        An Invoice represents a billing statement issued to an account or fleet.
+        It contains line items, payment status, total amounts, and the billing period it covers.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the invoice object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `invoice`.
+          example: null
+
+        amount_due:
+          type: integer
+          nullable: true
+          description: Total amount due on the invoice, in the smallest currency unit (e.g., cents).
+          example: null
+
+        amount_paid:
+          type: integer
+          nullable: true
+          description: Total amount paid toward the invoice.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the invoice was created.
+          example: null
+
+        currency:
+          type: string
+          description: ISO 4217 three-letter currency code (e.g., `usd`).
+          example: null
+
+        due_date:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Timestamp when the invoice is due.
+          example: null
+
+        line_items:
+          type: array
+          nullable: true
+          description: Array of individual line items included in the invoice.
+          items:
+            type: object
+          example: null
+
+        paid_at:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Timestamp when the invoice was fully paid, if applicable.
+          example: null
+
+        period_end:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: End of the billing period this invoice covers.
+          example: null
+
+        period_start:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Start of the billing period this invoice covers.
+          example: null
+
+        status:
+          type: string
+          nullable: true
+          enum: [draft, open, paid, overdue, void]
+          description: Current status of the invoice.
+          example: null
+
+    Report:
+      type: object
+      description: >
+        A Report represents an exported summary of charging activity, usage metrics,
+        or cost breakdowns over a given time period. Reports can be filtered, grouped,
+        and downloaded in CSV or other supported formats.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the report object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `reporting`.
+          example: null
+
+        account:
+          type: string
+          description: ID of the account associated with this report.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the report was created.
+          example: null
+
+        fleet:
+          type: string
+          description: ID of the fleet that this report is scoped to, if applicable.
+          example: null
+
+        parameters:
+          type: object
+          description: Parameters used to generate the report.
+          properties:
+            filters:
+              type: object
+              description: Filters applied when generating the report.
+              properties:
+                vehicle:
+                  type: array
+                  items:
+                    type: string
+                  description: List of vehicle IDs included in the report filter.
+                  example: null
+            group_by:
+              type: string
+              description: Field used to group data in the report (e.g., `vehicle`, `driver`).
+              example: null
+            period_start:
+              type: integer
+              format: unix-time
+              description: Start of the reporting period (inclusive).
+              example: null
+            period_end:
+              type: integer
+              format: unix-time
+              description: End of the reporting period (inclusive).
+              example: null
+            type:
+              type: string
+              description: Report type or template used (e.g., `charging_summary`).
+              example: null
+
+        size:
+          type: integer
+          description: Size of the generated report file in bytes.
+          example: null
+
+        status:
+          type: string
+          enum: [pending, processing, succeeded, failed]
+          description: Current status of the report generation process.
+          example: null
+
+        succeeded_at:
+          type: integer
+          format: unix-time
+          description: Timestamp when the report generation was completed successfully.
+          example: null
+
+        type:
+          type: string
+          description: File format of the generated report (e.g., `csv`, `pdf`).
+          example: null
+
+        url:
+          type: string
+          format: uri
+          description: Public URL to download the generated report file.
+          example: null
+
+    Reservation:
+      type: object
+      description: >
+        A Reservation represents a driver's intent to charge within a specific time window and geographic area.
+        Reservations are initially virtual and managed by Charge. Around 30 minutes before the reserved window,
+        Charge attempts to assign a real charging station and lock the reservation. This enables advanced scheduling
+        even when underlying CPOs do not support native future reservations.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the reservation object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `reservation`.
+          example: null
+
+        cancellation_policy:
+          type: object
+          description: Defines how and when a reservation can be cancelled without a fee.
+          properties:
+            type:
+              type: string
+              enum: [free_cancellation]
+              description: Type of cancellation policy applied to this reservation.
+              example: null
+            free_until_before:
+              type: integer
+              description: Number of seconds before the reserved start time until which cancellation is free.
+              example: null
+
+        charging_station:
+          type: string
+          nullable: true
+          description: ID of the assigned charging station once the reservation is locked. May be `null` until resolved.
+          example: null
+
+        connector_type:
+          type: string
+          description: Type(s) of connector requested for this reservation (e.g., `CCS`, `CHAdeMO`). Can represent fallback options.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the reservation was created.
+          example: null
+
+        currency:
+          type: string
+          description: ISO 4217 currency code (e.g., `usd`) used for the reservation fee.
+          example: null
+
+        driver:
+          type: string
+          description: ID of the driver who initiated the reservation.
+          example: null
+
+        location:
+          type: object
+          description: Location and radius indicating where the driver intends to charge.
+          properties:
+            latitude:
+              type: number
+              format: float
+              description: Latitude used to filter available stations.
+              example: null
+            longitude:
+              type: number
+              format: float
+              description: Longitude used to filter available stations.
+              example: null
+            radius:
+              type: integer
+              description: Radius in meters around the location for station matching.
+              example: null
+
+        metadata:
+          type: object
+          description: Set of key-value pairs for attaching custom structured data to the reservation.
+          example: null
+
+        payment_method:
+          type: string
+          description: ID of the payment method provided for charging the reservation fee.
+          example: null
+
+        reservation_fee:
+          type: integer
+          description: Amount charged for creating the reservation, in the smallest currency unit (e.g., cents).
+          example: null
+
+        reserved_start:
+          type: integer
+          format: unix-time
+          description: Desired start time for the reservation window.
+          example: null
+
+        reserved_end:
+          type: integer
+          format: unix-time
+          description: Desired end time for the reservation window.
+          example: null
+
+        status:
+          type: string
+          enum: [pending, locked, failed, cancelled, expired, completed]
+          description: Current status of the reservation in its lifecycle.
+          example: null
+
+        updated:
+          type: integer
+          format: unix-time
+          description: Time at which the reservation was last updated.
+          example: null
+
+        vehicle:
+          type: string
+          description: ID of the vehicle associated with this reservation.
+          example: null
+
+    WebhookEndpoint:
+      type: object
+      description: >
+        A WebhookEndpoint represents a registered URL that will receive real-time event notifications
+        from the Charge API. Developers can subscribe to specific events and receive webhook calls
+        when those events are triggered.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the webhook endpoint object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `webhook_admin_endpoint`.
+          example: null
+
+        api_version:
+          type: string
+          nullable: true
+          description: API version this webhook endpoint is configured to receive. Defaults to the account's version if `null`.
+          example: null
+
+        application:
+          type: string
+          nullable: true
+          description: ID of the application associated with this webhook, if applicable.
+          example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the webhook endpoint was created.
+          example: null
+
+        description:
+          type: string
+          nullable: true
+          description: An optional description for the webhook endpoint.
+          example: null
+
+        enabled_events:
+          type: array
+          description: List of event types that will trigger this webhook endpoint.
+          items:
+            type: string
+            example: null
+
+        livemode:
+          type: boolean
+          description: Indicates whether this webhook endpoint is operating in live or test mode.
+          example: null
+
+        metadata:
+          type: object
+          description: Set of key-value pairs for attaching custom structured data to the webhook endpoint.
+          example: null
+
+        secret:
+          type: string
+          description: Secret used to sign webhook payloads sent to this endpoint.
+          example: null
+
+        status:
+          type: string
+          enum: [enabled, disabled]
+          description: Current status of the webhook endpoint.
+          example: null
+
+        url:
+          type: string
+          format: uri
+          description: The URL that will receive the webhook POST requests.
+          example: null
+
+    PaymentMethod:
+      type: object
+      description: >
+        A Payment Method represents a saved way to pay for charging sessions, such as a credit card.
+        It can be attached to a driver, a fleet, or an account and is used during session billing or reservation fees.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the payment method object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `payment_method`.
+          example: null
+
+        billing_details:
+          type: object
+          description: Billing contact information associated with the payment method.
+          properties:
+            address:
+              type: object
+              description: Billing address of the payment method holder.
+              properties:
+                city:
+                  type: string
+                  description: City, town, or district.
+                  example: null
+                country:
+                  type: string
+                  description: ISO 3166-1 alpha-2 country code (e.g., `US`).
+                  example: null
+                line1:
+                  type: string
+                  description: First line of the street address.
+                  example: null
+                line2:
+                  type: string
+                  description: Second line of the address (optional).
+                  example: null
+                postal_code:
+                  type: string
+                  description: ZIP or postal code.
+                  example: null
+                state:
+                  type: string
+                  description: State, province, or administrative region.
+                  example: null
+            email:
+              type: string
+              description: Email address linked to the billing profile.
+              example: null
+            name:
+              type: string
+              description: Full name of the billing contact.
+              example: null
+            phone:
+              type: string
+              description: Phone number associated with the payment method.
+              example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the payment method was added.
+          example: null
+
+        details:
+          type: object
+          description: Card or method-specific details (non-sensitive).
+          properties:
+            brand:
+              type: string
+              description: Brand of the card (e.g., `visa`, `mastercard`).
+              example: null
+            last4:
+              type: string
+              description: Last four digits of the card number.
+              example: null
+            exp_month:
+              type: integer
+              description: Card expiration month (1–12).
+              example: null
+            exp_year:
+              type: integer
+              description: Card expiration year.
+              example: null
+
+        driver:
+          type: string
+          nullable: true
+          description: ID of the driver this payment method is associated with, if any.
+          example: null
+
+        fleet:
+          type: string
+          nullable: true
+          description: ID of the fleet this payment method is associated with, if any.
+          example: null
+
+        type:
+          type: string
+          description: Type of payment method (e.g., `card`, `wallet`).
+          example: null
+
+    Estimation:
+      type: object
+      description: >
+        An Estimation represents a real-time cost preview for a potential charging session.
+        It helps drivers and platforms understand the expected cost and duration of a session before it begins,
+        based on the vehicle's current battery level, charging goal, pricing, and station conditions.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the estimation object.
+          example: null
+
+        object:
+          type: string
+          description: String representing the object’s type. Always `estimation`.
+          example: null
+
+        battery_level:
+          type: integer
+          description: Current battery level of the vehicle before charging, as a percentage (0–100).
+          example: null
+
+        battery_target_level:
+          type: integer
+          description: Target battery level for this session, as a percentage (0–100).
+          example: null
+
+        cost_breakdown:
+          type: array
+          description: Itemized list of costs included in the estimate, such as energy, session, and idle fees.
+          items:
+            type: object
+            properties:
+              cost:
+                type: number
+                format: float
+                description: Total cost for this line item in currency units.
+                example: null
+              description:
+                type: string
+                description: Human-readable label for the line item (e.g., “Off-peak energy rate”).
+                example: null
+              quantity:
+                type: number
+                nullable: true
+                description: Quantity of the unit (e.g., energy in kWh, time in minutes), if applicable.
+                example: null
+              type:
+                type: string
+                description: Type of the cost item (e.g., `energy`, `session_fee`, `idle_fee`).
+                example: null
+              unit:
+                type: string
+                nullable: true
+                description: Unit of measurement (e.g., `kWh`, `minute`), if applicable.
+                example: null
+              unit_price:
+                type: number
+                format: float
+                nullable: true
+                description: Price per unit for this item (e.g., per kWh), if applicable.
+                example: null
+              tax_percent:
+                type: string
+                nullable: true
+                description: Optional tax rate or tax label applied to the item.
+                example: null
+
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the estimation was generated.
+          example: null
+
+        currency:
+          type: string
+          description: ISO 4217 three-letter currency code (e.g., `usd`).
+          example: null
+
+        estimated_duration:
+          type: integer
+          description: Estimated charging duration in seconds.
+          example: null
+
+        estimated_energy_kwh:
+          type: number
+          format: float
+          description: Estimated energy needed to reach the target battery level, in kilowatt-hours (kWh).
+          example: null
+
+        estimated_total_cost:
+          type: number
+          format: float
+          description: Total estimated cost for the session in currency units.
+          example: null
+
+        charging_station:
+          type: string
+          description: ID of the charging station used for this estimation.
+          example: null
+
+        valid_until:
+          type: integer
+          format: unix-time
+          description: Expiration timestamp for this estimate. The values may change after this point.
+          example: null
+
+        vehicle:
+          type: string
+          description: ID of the vehicle used for the estimation.
+          example: null
