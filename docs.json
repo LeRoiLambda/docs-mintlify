@@ -7,7 +7,7 @@
     "light": "#1fa04b",
     "dark": "#0D9373"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.ico",
   "navigation": {
     "anchors": [
       {
@@ -17,89 +17,90 @@
           {
             "group": "Getting Started",
             "pages": [
-              "introduction",
               {
                 "group": "Account",
                 "pages": [
-                  "create-a-account"
-                ]
-              },
-              {
-                "group": "Fleet",
-                "pages": [
-                  "create-a-fleet"
+                  "objects/account/create-a-account"
                 ]
               },
               {
                 "group": "Driver",
                 "pages": [
-                  "create-a-driver"
+                  "objects/driver/create-a-driver"
+                ]
+              },
+              {
+                "group": "Fleet",
+                "pages": [
+                  "objects/fleet/create-a-fleet"
                 ]
               },
               {
                 "group": "Vehicle",
                 "pages": [
-                  "create-a-vehicle"
+                  "objects/vehicle/create-a-vehicle"
                 ]
               },
               {
                 "group": "Vehicle Telemetry",
                 "pages": [
-                  "create-a-vehicle-telemetrie"
+                  "objects/vehicle-telemetry/create-a-vehicle-telemetry"
                 ]
               },
               {
-                "group": "Charging Station",
+                "group": "Big Menu",
+                "icon": "pen-paintbrush",
                 "pages": [
-                  "create-a-charging-station"
-                ]
-              },
-              {
-                "group": "Charging Session",
-                "pages": [
-                  "create-a-charging-session"
+                  {
+                    "group": "Estimation",
+                    "pages": [
+                      "objects/estimation/estimation-object",
+                      "objects/estimation/create-a-estimation"
+                    ]
+                  },
+                  {
+                    "group": "Charging Session",
+                    "pages": [
+                      "objects/charging-session/create-a-charging-session",
+                      "objects/charging-session/retrieve-a-charging-session"
+                    ]
+                  }
                 ]
               },
               {
                 "group": "Transaction",
                 "pages": [
-                  "create-a-transaction"
+                  "objects/transaction/create-a-transaction"
                 ]
               },
               {
                 "group": "Invoice",
                 "pages": [
-                  "create-a-invoice"
+                  "objects/invoice/create-a-invoice"
                 ]
               },
               {
                 "group": "Report",
                 "pages": [
-                  "create-a-report"
+                  "objects/report/create-a-report"
                 ]
               },
               {
                 "group": "Reservation",
                 "pages": [
-                  "create-a-reservation"
+                  "objects/reservation/create-a-reservation"
                 ]
               },
               {
                 "group": "Payment Method",
                 "pages": [
-                  "create-a-payment-method"
-                ]
-              },
-              {
-                "group": "Estimation",
-                "pages": [
-                  "create-a-estimation"
+                  "objects/payment-method/create-a-payment-method"
                 ]
               },
               {
                 "group": "Webhook",
                 "pages": [
-                  "create-a-webhook-endpoint"
+                  "objects/webhook/create-a-webhook-endpoint"
                 ]
               }
             ]

@@ -56,8 +56,8 @@ paths:
                 $ref: "#/components/schemas/Vehicle"
   /vehicle_telemetries:
     post:
-      summary: Create a vehicle telemetrie
-      operationId: createVehicleTelemetrie
+      summary: Create a vehicle telemetry
+      operationId: createVehicleTelemetry
       responses:
         "200":
           description: A newly created vehicle_telemetrie.
@@ -157,9 +157,17 @@ paths:
     post:
       summary: Create a estimation
       operationId: createEstimation
+      requestBody:
+        $ref: "#/components/schemas/Estimation"
       responses:
         "200":
           description: A newly created estimation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Estimation"
+        "401":
+          description: Lol.
           content:
             application/json:
               schema:
