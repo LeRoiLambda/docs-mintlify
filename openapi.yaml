@@ -118,6 +118,12 @@ components:
           nullable: true
           description: Display name or registered name of the account.
           example: null
+        plan:
+          type: string
+          description: >-
+            Subscription or feature plan assigned to the fleet (e.g.,
+            `professional`).
+          example: null
         preferences:
           type: object
           description: Account-level preferences for billing, notifications, and reports.
@@ -409,10 +415,6 @@ components:
           format: unix-time
           description: Time at which the fleet was created (UNIX timestamp).
           example: null
-        currency:
-          type: string
-          description: Three-letter ISO currency code used for this fleet (e.g., `usd`).
-          example: null
         description:
           type: string
           nullable: true
@@ -439,12 +441,6 @@ components:
           type: string
           nullable: true
           description: Optional phone number associated with the fleet.
-          example: null
-        plan:
-          type: string
-          description: >-
-            Subscription or feature plan assigned to the fleet (e.g.,
-            `professional`).
           example: null
         preferences:
           type: object
@@ -1693,12 +1689,6 @@ paths:
               type: object
               additionalProperties: false
               properties:
-                name:
-                  type: string
-                  description: Human-readable name for the fleet.
-                currency:
-                  type: string
-                  description: ISO 4217 currency code (e.g., `usd`).
                 email:
                   type: string
                   description: Optional contact email for fleet notifications.
@@ -1709,9 +1699,9 @@ paths:
                   type: string
                   enum: [international_system, us_customary_system, imperial_system]
                   description: Preferred unit system for reports.
-                plan:
+                name:
                   type: string
-                  description: Subscription plan (e.g., `professional`).
+                  description: Human-readable name for the fleet.
                 preferences:
                   $ref: '#/components/schemas/Fleet/properties/preferences'
                 metadata:
@@ -1719,7 +1709,6 @@ paths:
                   description: Custom key-value pairs for integration needs.
               required:
                 - name
-                - currency
       responses:
         '200':
           description: Fleet successfully created.
@@ -1874,9 +1863,6 @@ paths:
                   type: string
                   enum: [international_system, us_customary_system, imperial_system]
                   description: Updated preferred unit system.
-                plan:
-                  type: string
-                  description: Change the subscription or feature plan.
                 preferences:
                   $ref: '#/components/schemas/Fleet/properties/preferences'
                 status:
