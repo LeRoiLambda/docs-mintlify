@@ -32,7 +32,14 @@
               {
                 "group": "Fleet",
                 "pages": [
-                  "objects/fleet/create-a-fleet"
+                  "objects/fleet/create-a-fleet",
+                  "objects/fleet/update-a-fleet",
+                  "objects/fleet/retrieve-a-fleet",
+                  "objects/fleet/add-a-driver-to-a-fleet",
+                  "objects/fleet/add-a-vehicle-to-a-fleet",
+                  "objects/fleet/list-fleet’s-drivers",
+                  "objects/fleet/list-fleet’s-vehicles",
+                  "objects/fleet/delete-a-fleet"
                 ]
               },
               {

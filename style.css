@@ -8,7 +8,11 @@ div[id^="schema-"] + div > div:has(> span),
     margin-top: 2rem;
 }
 
-@media (min-width: 1280px) {
+#navigation-items a.group > span {
+    display: none;
+}
+
+@media (min-width: 1024px) {
     #navbar + div,
     #navbar-transition + div {
         max-width: none;
@@ -26,11 +30,9 @@ div[id^="schema-"] + div > div:has(> span),
         padding-bottom: 1rem;
         padding-right: 0;
     }
+}
 
-    a.group > span {
-        display: none;
-    }
-
+@media (min-width: 1280px) {
     #navigation-items div:hover,
     #navigation-items a:not(.bg-primary\/10):hover {
         background-color: transparent;

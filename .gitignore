@@ -1,3 +1,5 @@
-objects.txt
 .prettierignore
 .prettierrc
+stripe-openapi.yaml
+stripe-openapi-sdk.yaml
+stripe-openapi-sdk-subset.yaml
