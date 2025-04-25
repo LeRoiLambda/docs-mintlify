@@ -20,12 +20,14 @@
               {
                 "group": "Accounts",
                 "pages": [
+                  "api/accounts/object",
                   "api/accounts/create"
                 ]
               },
               {
                 "group": "Drivers",
                 "pages": [
+                  "api/drivers/object",
                   "api/drivers/create"
                 ]
               },
@@ -46,12 +48,14 @@
               {
                 "group": "Vehicles",
                 "pages": [
+                  "api/vehicles/object",
                   "api/vehicles/create"
                 ]
               },
               {
                 "group": "Vehicle Telemetries",
                 "pages": [
+                  "api/vehicle_telemetries/object",
                   "api/vehicle_telemetries/create"
                 ]
               },
@@ -69,6 +73,7 @@
                   {
                     "group": "Charging Sessions",
                     "pages": [
+                      "api/charging_sessions/object",
                       "api/charging_sessions/create",
                       "api/charging_sessions/retrieve"
                     ]
@@ -78,36 +83,42 @@
               {
                 "group": "Transactions",
                 "pages": [
+                  "api/transactions/object",
                   "api/transactions/create"
                 ]
               },
               {
                 "group": "Invoices",
                 "pages": [
+                  "api/invoices/object",
                   "api/invoices/create"
                 ]
               },
               {
                 "group": "Reports",
                 "pages": [
+                  "api/reports/object",
                   "api/reports/create"
                 ]
               },
               {
                 "group": "Reservations",
                 "pages": [
+                  "api/reservations/object",
                   "api/reservations/create"
                 ]
               },
               {
                 "group": "Payment Methods",
                 "pages": [
+                  "api/payment_methods/object",
                   "api/payment_methods/create"
                 ]
               },
               {
                 "group": "Webhooks",
                 "pages": [
+                  "api/webhooks/object",
                   "api/webhooks/create"
                 ]
               }

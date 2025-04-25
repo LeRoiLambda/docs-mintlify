@@ -11,7 +11,7 @@ servers:
 
 components:
   schemas:
-    Account:
+    account:
       type: object
       description: >
         An Account represents a customer or organization using Charge. This may
@@ -706,7 +706,7 @@ components:
             Vehicle Identification Number (VIN), used to uniquely identify the
             vehicle.
           example: null
-    VehicleTelemetry:
+    vehicle_telemetry:
       type: object
       description: >
         VehicleTelemetry provides real-time insights from a connected electric
@@ -800,7 +800,7 @@ components:
               format: unix-time
               description: Time at which the odometer was last updated.
               example: null
-    ChargingStation:
+    charging_station:
       type: object
       description: >
         A Charging Station represents a physical location where electric
@@ -1119,7 +1119,7 @@ components:
           format: unix-time
           description: Time at which the session was last updated.
           example: null
-    Transaction:
+    transaction:
       type: object
       description: >
         A Transaction represents a finalized financial event related to a
@@ -1186,7 +1186,7 @@ components:
           type: string
           description: ID of the vehicle linked to the transaction.
           example: null
-    Invoice:
+    invoice:
       type: object
       description: >
         An Invoice represents a billing statement issued to an account or fleet.
@@ -1264,7 +1264,7 @@ components:
             - void
           description: Current status of the invoice.
           example: null
-    Report:
+    report:
       type: object
       description: >
         A Report represents an exported summary of charging activity, usage
@@ -1353,7 +1353,7 @@ components:
           format: uri
           description: Public URL to download the generated report file.
           example: null
-    Reservation:
+    reservation:
       type: object
       description: >
         A Reservation represents a driver's intent to charge within a specific
@@ -1477,81 +1477,7 @@ components:
           type: string
           description: ID of the vehicle associated with this reservation.
           example: null
-    WebhookEndpoint:
-      type: object
-      description: >
-        A WebhookEndpoint represents a registered URL that will receive
-        real-time event notifications from the Charge API. Developers can
-        subscribe to specific events and receive webhook calls when those events
-        are triggered.
-      properties:
-        id:
-          type: string
-          description: Unique identifier for the webhook endpoint object.
-          example: null
-        object:
-          type: string
-          description: >-
-            String representing the object’s type. Always
-            `webhook_admin_endpoint`.
-          example: null
-        api_version:
-          type: string
-          nullable: true
-          description: >-
-            API version this webhook endpoint is configured to receive. Defaults
-            to the account's version if `null`.
-          example: null
-        application:
-          type: string
-          nullable: true
-          description: ID of the application associated with this webhook, if applicable.
-          example: null
-        created:
-          type: integer
-          format: unix-time
-          description: Time at which the webhook endpoint was created.
-          example: null
-        description:
-          type: string
-          nullable: true
-          description: An optional description for the webhook endpoint.
-          example: null
-        enabled_events:
-          type: array
-          description: List of event types that will trigger this webhook endpoint.
-          items:
-            type: string
-            example: null
-        livemode:
-          type: boolean
-          description: >-
-            Indicates whether this webhook endpoint is operating in live or test
-            mode.
-          example: null
-        metadata:
-          type: object
-          description: >-
-            Set of key-value pairs for attaching custom structured data to the
-            webhook endpoint.
-          example: null
-        secret:
-          type: string
-          description: Secret used to sign webhook payloads sent to this endpoint.
-          example: null
-        status:
-          type: string
-          enum:
-            - enabled
-            - disabled
-          description: Current status of the webhook endpoint.
-          example: null
-        url:
-          type: string
-          format: uri
-          description: The URL that will receive the webhook POST requests.
-          example: null
-    PaymentMethod:
+    payment_method:
       type: object
       description: >
         A Payment Method represents a saved way to pay for charging sessions,
@@ -1648,6 +1574,80 @@ components:
         type:
           type: string
           description: Type of payment method (e.g., `card`, `wallet`).
+          example: null
+    webhook_endpoint:
+      type: object
+      description: >
+        A WebhookEndpoint represents a registered URL that will receive
+        real-time event notifications from the Charge API. Developers can
+        subscribe to specific events and receive webhook calls when those events
+        are triggered.
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the webhook endpoint object.
+          example: null
+        object:
+          type: string
+          description: >-
+            String representing the object’s type. Always
+            `webhook_admin_endpoint`.
+          example: null
+        api_version:
+          type: string
+          nullable: true
+          description: >-
+            API version this webhook endpoint is configured to receive. Defaults
+            to the account's version if `null`.
+          example: null
+        application:
+          type: string
+          nullable: true
+          description: ID of the application associated with this webhook, if applicable.
+          example: null
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the webhook endpoint was created.
+          example: null
+        description:
+          type: string
+          nullable: true
+          description: An optional description for the webhook endpoint.
+          example: null
+        enabled_events:
+          type: array
+          description: List of event types that will trigger this webhook endpoint.
+          items:
+            type: string
+            example: null
+        livemode:
+          type: boolean
+          description: >-
+            Indicates whether this webhook endpoint is operating in live or test
+            mode.
+          example: null
+        metadata:
+          type: object
+          description: >-
+            Set of key-value pairs for attaching custom structured data to the
+            webhook endpoint.
+          example: null
+        secret:
+          type: string
+          description: Secret used to sign webhook payloads sent to this endpoint.
+          example: null
+        status:
+          type: string
+          enum:
+            - enabled
+            - disabled
+          description: Current status of the webhook endpoint.
+          example: null
+        url:
+          type: string
+          format: uri
+          description: The URL that will receive the webhook POST requests.
           example: null
 
 paths:
@@ -2188,18 +2188,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VehicleTelemetry"
+                $ref: "#/components/schemas/vehicle_telemetry"
   /charging_stations:
     post:
       summary: Create a charging station
-      operationId: createChargingStation
+      operationId: postChargingStations
       responses:
         "200":
           description: A newly created charging_station.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChargingStation"
+                $ref: "#/components/schemas/charging_station"
   /charging_sessions:
     post:
       summary: Create a charging session
@@ -2273,7 +2273,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/transaction"
   /invoices:
     post:
       summary: Create a invoice
@@ -2284,7 +2284,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Invoice"
+                $ref: "#/components/schemas/invoice"
   /reports:
     post:
       summary: Create a report
@@ -2295,7 +2295,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Report"
+                $ref: "#/components/schemas/report"
   /reservations:
     post:
       summary: Create a reservation
@@ -2306,7 +2306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Reservation"
+                $ref: "#/components/schemas/reservation"
   /webhook_endpoints:
     post:
       summary: Create a webhook endpoint
@@ -2317,7 +2317,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WebhookEndpoint"
+                $ref: "#/components/schemas/webhook_endpoint"
   /payment_methods:
     post:
       summary: Create a payment method
@@ -2328,7 +2328,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentMethod"
+                $ref: "#/components/schemas/payment_method"
   /estimations:
     post:
       summary: Create a estimation
