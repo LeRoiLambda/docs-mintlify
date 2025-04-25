@@ -21,5 +21,3 @@
     document.body.appendChild(tag)
     setTimeout(() => tag.remove(), 4000)
 })()
-
-//TODO object pages, mobile version, code group not showing

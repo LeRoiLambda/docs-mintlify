@@ -12,6 +12,29 @@ div[id^="schema-"] + div > div:has(> span),
     display: none;
 }
 
+#navigation-items div > svg[style*="pen-paintbrush.svg"] {
+    display: none;
+}
+
+#navigation-items > div svg:only-of-type {
+    display: none;
+}
+
+#navigation-items div:hover,
+#navigation-items a:not(.bg-primary\/10):hover {
+    background-color: transparent;
+}
+
+#navigation-items div:has(> svg[style*="pen-paintbrush.svg"]) {
+    font-weight: bold;
+    justify-content: space-between;
+}
+
+div[id="headlessui-dialog-overlay-:r1:"] + div {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 @media (min-width: 1024px) {
     #navbar + div,
     #navbar-transition + div {
@@ -33,28 +56,6 @@ div[id^="schema-"] + div > div:has(> span),
 }
 
 @media (min-width: 1280px) {
-    #navigation-items div:hover,
-    #navigation-items a:not(.bg-primary\/10):hover {
-        background-color: transparent;
-    }
-
-    #navigation-items div:has(> svg[style*="pen-paintbrush.svg"]) {
-        font-weight: bold;
-        justify-content: space-between;
-    }
-
-    #navigation-items div:has(> svg[style*="pen-paintbrush.svg"]) > svg {
-        background-color: red;
-    }
-
-    #navigation-items div > svg[style*="pen-paintbrush.svg"] {
-        display: none;
-    }
-
-    #navigation-items > div svg:only-of-type {
-        display: none;
-    }
-
     #content-area {
         padding-left: min(28rem, calc(22rem + 5vw));
         width: calc(100% - 46rem);

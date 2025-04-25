@@ -18,40 +18,41 @@
             "group": "Getting Started",
             "pages": [
               {
-                "group": "Account",
+                "group": "Accounts",
                 "pages": [
-                  "objects/account/create-a-account"
+                  "api/accounts/create"
                 ]
               },
               {
-                "group": "Driver",
+                "group": "Drivers",
                 "pages": [
-                  "objects/driver/create-a-driver"
+                  "api/drivers/create"
                 ]
               },
               {
-                "group": "Fleet",
+                "group": "Fleets",
                 "pages": [
-                  "objects/fleet/create-a-fleet",
-                  "objects/fleet/update-a-fleet",
-                  "objects/fleet/retrieve-a-fleet",
-                  "objects/fleet/add-a-driver-to-a-fleet",
-                  "objects/fleet/add-a-vehicle-to-a-fleet",
-                  "objects/fleet/list-fleet’s-drivers",
-                  "objects/fleet/list-fleet’s-vehicles",
-                  "objects/fleet/delete-a-fleet"
+                  "api/fleets/object",
+                  "api/fleets/create",
+                  "api/fleets/update",
+                  "api/fleets/retrieve",
+                  "api/fleets/driver",
+                  "api/fleets/vehicle",
+                  "api/fleets/list-driver",
+                  "api/fleets/list-vehicle",
+                  "api/fleets/delete"
                 ]
               },
               {
-                "group": "Vehicle",
+                "group": "Vehicles",
                 "pages": [
-                  "objects/vehicle/create-a-vehicle"
+                  "api/vehicles/create"
                 ]
               },
               {
-                "group": "Vehicle Telemetry",
+                "group": "Vehicle Telemetries",
                 "pages": [
-                  "objects/vehicle-telemetry/create-a-vehicle-telemetry"
+                  "api/vehicle_telemetries/create"
                 ]
               },
               {
@@ -59,55 +60,55 @@
                 "icon": "pen-paintbrush",
                 "pages": [
                   {
-                    "group": "Estimation",
+                    "group": "Estimations",
                     "pages": [
-                      "objects/estimation/estimation-object",
-                      "objects/estimation/create-a-estimation"
+                      "api/estimations/object",
+                      "api/estimations/create"
                     ]
                   },
                   {
-                    "group": "Charging Session",
+                    "group": "Charging Sessions",
                     "pages": [
-                      "objects/charging-session/create-a-charging-session",
-                      "objects/charging-session/retrieve-a-charging-session"
+                      "api/charging_sessions/create",
+                      "api/charging_sessions/retrieve"
                     ]
                   }
                 ]
               },
               {
-                "group": "Transaction",
+                "group": "Transactions",
                 "pages": [
-                  "objects/transaction/create-a-transaction"
+                  "api/transactions/create"
                 ]
               },
               {
-                "group": "Invoice",
+                "group": "Invoices",
                 "pages": [
-                  "objects/invoice/create-a-invoice"
+                  "api/invoices/create"
                 ]
               },
               {
-                "group": "Report",
+                "group": "Reports",
                 "pages": [
-                  "objects/report/create-a-report"
+                  "api/reports/create"
                 ]
               },
               {
-                "group": "Reservation",
+                "group": "Reservations",
                 "pages": [
-                  "objects/reservation/create-a-reservation"
+                  "api/reservations/create"
                 ]
               },
               {
-                "group": "Payment Method",
+                "group": "Payment Methods",
                 "pages": [
-                  "objects/payment-method/create-a-payment-method"
+                  "api/payment_methods/create"
                 ]
               },
               {
-                "group": "Webhook",
+                "group": "Webhooks",
                 "pages": [
-                  "objects/webhook/create-a-webhook-endpoint"
+                  "api/webhooks/create"
                 ]
               }
             ]

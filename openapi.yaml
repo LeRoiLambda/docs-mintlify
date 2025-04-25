@@ -364,7 +364,7 @@ components:
           type: string
           description: ID of the vehicle used for the estimation.
           example: null
-    Fleet:
+    fleet:
       type: object
       description: >
         A Fleet represents a group of vehicles and drivers managed under a
@@ -516,7 +516,7 @@ components:
             Fleet's current wallet or prepaid balance in the smallest currency
             unit (e.g., cents).
           example: null
-    Driver:
+    driver:
       type: object
       description: >
         A Driver represents an individual authorized to initiate and manage
@@ -621,7 +621,7 @@ components:
             Driver’s wallet or prepaid balance in the smallest currency unit
             (e.g., cents).
           example: null
-    Vehicle:
+    vehicle:
       type: object
       description: >
         A Vehicle represents an electric vehicle registered within the Charge
@@ -1027,7 +1027,7 @@ components:
           format: unix-time
           description: Time at which the station was last updated.
           example: null
-    ChargingSession:
+    charging_session:
       type: object
       description: >
         A Charging Session represents a real-time or completed EV charging
@@ -1703,7 +1703,7 @@ paths:
                   type: string
                   description: Human-readable name for the fleet.
                 preferences:
-                  $ref: '#/components/schemas/Fleet/properties/preferences'
+                  $ref: '#/components/schemas/fleet/properties/preferences'
                 metadata:
                   type: object
                   description: Custom key-value pairs for integration needs.
@@ -1715,7 +1715,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                $ref: '#/components/schemas/fleet'
         default:
           description: Error response.
           content:
@@ -1816,7 +1816,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                $ref: '#/components/schemas/fleet'
         '404':
           description: Fleet not found.
           content:
@@ -1864,7 +1864,7 @@ paths:
                   enum: [international_system, us_customary_system, imperial_system]
                   description: Updated preferred unit system.
                 preferences:
-                  $ref: '#/components/schemas/Fleet/properties/preferences'
+                  $ref: '#/components/schemas/fleet/properties/preferences'
                 status:
                   type: string
                   enum: [active, suspended, archived]
@@ -1878,7 +1878,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                $ref: '#/components/schemas/fleet'
         '404':
           description: Fleet not found.
           content:
@@ -1949,7 +1949,7 @@ paths:
                     type: array
                     description: Array of Driver objects.
                     items:
-                      $ref: '#/components/schemas/Driver'
+                      $ref: '#/components/schemas/driver'
                   has_more:
                     type: boolean
                     description: True if more pages are available.
@@ -2004,7 +2004,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Driver'
+                $ref: '#/components/schemas/driver'
         '404':
           description: Fleet or driver not found.
           content:
@@ -2082,7 +2082,7 @@ paths:
                     type: array
                     description: Array of Vehicle objects.
                     items:
-                      $ref: '#/components/schemas/Vehicle'
+                      $ref: '#/components/schemas/vehicle'
                   has_more:
                     type: boolean
                     description: True if additional pages are available.
@@ -2136,7 +2136,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Vehicle'
+                $ref: '#/components/schemas/vehicle'
         '404':
           description: Fleet or vehicle not found.
           content:
@@ -2166,7 +2166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Driver"
+                $ref: "#/components/schemas/driver"
   /vehicles:
     post:
       summary: Create a vehicle
@@ -2177,7 +2177,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Vehicle"
+                $ref: "#/components/schemas/vehicle"
   /vehicle_telemetries:
     post:
       summary: Create a vehicle telemetry
@@ -2203,14 +2203,66 @@ paths:
   /charging_sessions:
     post:
       summary: Create a charging session
-      operationId: createChargingSession
+      operationId: postChargingSessions
       responses:
         "200":
           description: A newly created charging_session.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChargingSession"
+                $ref: "#/components/schemas/charging_session"
+  /charging_sessions/{charging_session}:
+    get:
+      description: >
+        Retrieves a Charging Session
+      operationId: getChargingSessionsChargingSession
+      parameters:
+        - in: path
+          name: charging_session
+          required: true
+          schema:
+            type: string
+          description: ID of the Charging session to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies which related objects to expand in the response
+            (e.g., `expand[]=address`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Charging session successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/charging_session'
+        '404':
+          description: Charging session not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve a charging session
   /transactions:
     post:
       summary: Create a transaction

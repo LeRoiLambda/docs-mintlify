@@ -1,9 +1,12 @@
 // Implements single-open accordion behavior
 function initAccordion(navRoot) {
+    console.log("Test1")
     if (navRoot._accordionInitialized) return
     navRoot._accordionInitialized = true
 
+    console.log("Test2")
     const onClick = (event) => {
+        console.log("Test3")
         if (!event.isTrusted) return
         const group = event.target.closest(".group")
         if (!group || event.target.closest("a")) return
@@ -49,21 +52,18 @@ function initAccordion(navRoot) {
     navRoot._accordionObserver = mObs
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const existing = document.getElementById("navigation-items")
-    if (existing) initAccordion(existing)
+const existing = document.getElementById("navigation-items")
+if (existing) initAccordion(existing)
 
-    const bodyObs = new MutationObserver((mutations) => {
-        for (const { addedNodes } of mutations) {
-            for (const node of addedNodes) {
-                if (node.nodeType !== Node.ELEMENT_NODE) continue
-                const sidebar =
-                    node.id === "navigation-items"
-                        ? node
-                        : node.querySelector?.("#navigation-items")
-                if (sidebar) initAccordion(sidebar)
-            }
+const bodyObs = new MutationObserver((mutations) => {
+    for (const { addedNodes } of mutations) {
+        for (const node of addedNodes) {
+            if (node.nodeType !== Node.ELEMENT_NODE) continue
+            const sidebar =
+                node.id === "navigation-items" ? node : node.querySelector?.("#navigation-items")
+
+            if (sidebar) initAccordion(sidebar)
         }
-    })
-    bodyObs.observe(document.body, { childList: true, subtree: true })
+    }
 })
+bodyObs.observe(document.body, { childList: true, subtree: true })
