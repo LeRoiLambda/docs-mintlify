@@ -484,9 +484,7 @@ components:
           type: string
           description: >-
             IANA timezone identifier used for reporting and scheduling (e.g.,
-            `Etc/UTC`). 
-            
-          example: America/Los_Angeles
+            `Etc/UTC`).
           example: null
         total_drivers:
           type: integer
@@ -1693,7 +1691,7 @@ paths:
               properties:
                 email:
                   type: string
-                  description: Contact email for fleet notifications.
+                  description: Optional contact email for fleet notifications.
                 timezone:
                   type: string
                   description: IANA timezone (e.g., `Europe/Paris`).
