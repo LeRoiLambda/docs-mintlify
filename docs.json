@@ -21,14 +21,38 @@
                 "group": "Accounts",
                 "pages": [
                   "api/accounts/object",
-                  "api/accounts/create"
+                  "api/accounts/create",
+                  "api/accounts/update",
+                  "api/accounts/retrieve"
+                ]
+              },
+              {
+                "group": "Charging Stations",
+                "pages": [
+                  "api/charging_stations/object",
+                  "api/charging_stations/retrieve",
+                  "api/charging_stations/available",
+                  "api/charging_stations/compatible",
+                  "api/charging_stations/favorite",
+                  "api/charging_stations/trip",
+                  "api/charging_stations/list_vehicle",
+                  "api/charging_stations/list"
                 ]
               },
               {
                 "group": "Drivers",
                 "pages": [
                   "api/drivers/object",
-                  "api/drivers/create"
+                  "api/drivers/create",
+                  "api/drivers/update",
+                  "api/drivers/retrieve",
+                  "api/drivers/list_fleet",
+                  "api/drivers/list_vehicle",
+                  "api/drivers/list",
+                  "api/drivers/delete",
+                  "api/drivers/attach_fleet",
+                  "api/drivers/attach_vehicle",
+                  "api/drivers/detach_vehicle"
                 ]
               },
               {
@@ -38,53 +62,57 @@
                   "api/fleets/create",
                   "api/fleets/update",
                   "api/fleets/retrieve",
-                  "api/fleets/driver",
-                  "api/fleets/vehicle",
-                  "api/fleets/list-driver",
-                  "api/fleets/list-vehicle",
                   "api/fleets/delete"
+                ]
+              },
+              {
+                "group": "Menu",
+                "icon": "pen-paintbrush",
+                "pages": [
+                  {
+                    "group": "Charging Sessions",
+                    "pages": [
+                      "api/charging_sessions/object",
+                      "api/charging_sessions/create",
+                      "api/charging_sessions/retrieve",
+                      "api/charging_sessions/active_driver",
+                      "api/charging_sessions/active_fleet",
+                      "api/charging_sessions/end",
+                      "api/charging_sessions/list_driver",
+                      "api/charging_sessions/list_fleet",
+                      "api/charging_sessions/list_vehicle"
+                    ]
+                  },
+                  {
+                    "group": "Estimations",
+                    "pages": [
+                      "api/estimations/object",
+                      "api/estimations/create",
+                      "api/estimations/retrieve"
+                    ]
+                  }
                 ]
               },
               {
                 "group": "Vehicles",
                 "pages": [
                   "api/vehicles/object",
-                  "api/vehicles/create"
+                  "api/vehicles/create",
+                  "api/vehicles/update",
+                  "api/vehicles/retrieve",
+                  "api/vehicles/list_driver",
+                  "api/vehicles/list_fleet",
+                  "api/vehicles/delete",
+                  "api/vehicles/attach_driver",
+                  "api/vehicles/attach_fleet",
+                  "api/vehicles/detach_driver"
                 ]
               },
               {
                 "group": "Vehicle Telemetries",
                 "pages": [
                   "api/vehicle_telemetries/object",
-                  "api/vehicle_telemetries/create"
-                ]
-              },
-              {
-                "group": "Big Menu",
-                "icon": "pen-paintbrush",
-                "pages": [
-                  {
-                    "group": "Estimations",
-                    "pages": [
-                      "api/estimations/object",
-                      "api/estimations/create"
-                    ]
-                  },
-                  {
-                    "group": "Charging Sessions",
-                    "pages": [
-                      "api/charging_sessions/object",
-                      "api/charging_sessions/create",
-                      "api/charging_sessions/retrieve"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "Transactions",
-                "pages": [
-                  "api/transactions/object",
-                  "api/transactions/create"
+                  "api/vehicle_telemetries/retrieve"
                 ]
               },
               {
@@ -92,6 +120,13 @@
                 "pages": [
                   "api/invoices/object",
                   "api/invoices/create"
+                ]
+              },
+              {
+                "group": "Payment Methods",
+                "pages": [
+                  "api/payment_methods/object",
+                  "api/payment_methods/create"
                 ]
               },
               {
@@ -109,10 +144,10 @@
                 ]
               },
               {
-                "group": "Payment Methods",
+                "group": "Transactions",
                 "pages": [
-                  "api/payment_methods/object",
-                  "api/payment_methods/create"
+                  "api/transactions/object",
+                  "api/transactions/create"
                 ]
               },
               {

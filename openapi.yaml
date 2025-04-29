@@ -195,7 +195,7 @@ components:
         message:
           type: string
           description: Human-readable description of the error.
-          example: "The fleet_id provided does not exist."
+          example: "The fleet ID provided does not exist."
         code:
           type: string
           nullable: true
@@ -207,8 +207,8 @@ components:
           type: string
           nullable: true
           description: Name of the request parameter that caused the error, if applicable.
-          example: fleet_id
-        request_id:
+          example: fleet
+        request:
           type: string
           description: >
             Unique identifier for the request. Include this when contacting Charge
@@ -228,7 +228,7 @@ components:
         - object
         - type
         - message
-        - request_id
+        - request
     error_list:
       type: object
       description: Envelope for batch or list operations that can return multiple errors.
@@ -1653,34 +1653,1490 @@ components:
 paths:
   /accounts:
     post:
-      description: Create an account
-      operationId: PostAccounts
-      parameters:
-        - in: query
-          name: dgs
-          style: deepObject
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              id:
-                type: integer
+      description: >
+        Creates a new Account object.  
+        An account is the top-level container for all other resources
+        (vehicles, drivers, stations, etc.).  
+        Use this endpoint to onboard a fleet, platform integration,
+        or business entity into Charge.
+      operationId: postAccounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  description: Display name of the account.
+                email:
+                  type: string
+                  description: Primary contact email.
+                type:
+                  type: string
+                  enum: [individual, business]
+                  description: Legal entity type.
+                default_currency:
+                  type: string
+                  description: ISO-4217 currency code (e.g., `usd`).
+                metric_system:
+                  type: string
+                  enum: [metric, imperial]
+                  description: Preferred measurement system.
+                plan:
+                  type: string
+                  description: Subscription plan (e.g., `professional`).
+                preferences:
+                  $ref: '#/components/schemas/account/properties/preferences'
+                metadata:
+                  type: object
+                  description: Custom key-value pairs for integration needs.
+              required:
+                - name
+                - email
+                - type
       responses:
-        "200":
-          description: A newly created account.
+        '200':
+          description: Account successfully created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/estimation"
+                $ref: '#/components/schemas/account'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Create an account
+  /accounts/{account}:
+    get:
+      description: >
+        Retrieves the full Account object by its unique ID.  
+        The response includes core profile data, billing preferences, plan
+        details, and any custom metadata stored on the account.
+      operationId: getAccountsAccount
+      parameters:
+        - in: path
+          name: account
+          required: true
+          schema:
+            type: string
+          description: ID of the account to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in the response
+            (e.g., `expand[]=billing_details`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Account successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/account'
+        '404':
+          description: Account not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve an account
+    post:
+      description: >
+        Updates the specified Account object by setting the values of the
+        parameters provided. Parameters omitted from the request remain
+        unchanged.
+      operationId: postAccountsAccount
+      parameters:
+        - in: path
+          name: account
+          required: true
+          schema:
+            type: string
+          description: ID of the account to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  description: New display name for the account.
+                email:
+                  type: string
+                  description: Updated contact email.
+                description:
+                  type: string
+                  description: Internal description or note.
+                metric_system:
+                  type: string
+                  enum: [metric, imperial]
+                  description: Updated measurement system preference.
+                plan:
+                  type: string
+                  description: Change the subscription plan.
+                preferences:
+                  $ref: '#/components/schemas/account/properties/preferences'
+                metadata:
+                  type: object
+                  description: Merge or replace custom key-value pairs.
+                status:
+                  type: string
+                  enum: [active, suspended, archived]
+                  description: Set operational status for the account.
+      responses:
+        '200':
+          description: Account successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/account'
+        '404':
+          description: Account not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Update an account
+  /charging_sessions:
+    post:
+      description: >
+        Starts a new Charging Session on a specific connector.  
+        The session remains **active** until it is explicitly ended or the
+        charging station stops delivering power.  
+        A successful response returns the live session object, including a
+        `status` of `active`, the start timestamp, and an authorization
+        reference if applicable.
+      operationId: postChargingSessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                charging_station:
+                  type: string
+                  description: ID of the station where charging will occur.
+                connector:
+                  type: string
+                  description: ID of the specific connector to activate.
+                driver:
+                  type: string
+                  description: ID of the driver starting the session.
+                vehicle:
+                  type: string
+                  description: ID of the vehicle being charged.
+                payment_method:
+                  type: string
+                  description: >
+                    ID of the payment method to authorize and bill for this
+                    session.
+                session_limit_wh:
+                  type: integer
+                  description: >
+                    Optional energy limit in watt-hours to auto-stop charging
+                    when reached.
+                metadata:
+                  type: object
+                  description: Custom key-value pairs for integration needs.
+              required:
+                - charging_station
+                - connector
+                - driver
+                - vehicle
+                - payment_method
+      responses:
+        '200':
+          description: Charging session successfully initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/charging_session'
+        '402':
+          description: Payment authorization failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Station, connector, driver, or vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '409':
+          description: Connector already in use or session conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Initiate a charging session
+  /charging_sessions/{charging_session}:
+    get:
+      description: >
+        Retrieves the Charging Session object by its unique ID.  
+        The response includes real-time status if the session is still active,
+        or final cost and energy metrics if it has been completed.
+      operationId: getChargingSessionsChargingSession
+      parameters:
+        - in: path
+          name: charging_session
+          required: true
+          schema:
+            type: string
+          description: ID of the charging session to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (e.g., `expand[]=charging_station`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Charging session successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/charging_session'
+        '404':
+          description: Session not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve a charging session
+  /charging_sessions/{charging_session}/end:
+    post:
+      description: >
+        Stops power delivery, closes the active Charging Session, and finalizes
+        billing.  
+        When the session is successfully ended, the response contains the
+        completed session object with `status` set to `completed`, the
+        `session_ended` timestamp, the final `energy_consumed`, and the
+        `amount_due`.
+      operationId: postChargingSessionsChargingSessionEnd
+      parameters:
+        - in: path
+          name: charging_session
+          required: true
+          schema:
+            type: string
+          description: ID of the charging session to end.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                reason:
+                  type: string
+                  enum: [driver_request, vehicle_full, station_error, idle_timeout]
+                  description: Optional reason why the session was terminated.
+                meter_wh:
+                  type: integer
+                  description: >
+                    Optional final meter reading in watt-hours, if provided by
+                    the station for reconciliation.
+      responses:
+        '200':
+          description: Charging session successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/charging_session'
+        '404':
+          description: Session not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '409':
+          description: Session is already completed or not active.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Complete a charging session
+  /charging_stations:
+    get:
+      description: >
+        Returns a paginated list of ChargingStation objects, sorted by creation
+        date with the most recently added stations first.  
+        You can filter the results by geographic bounding box or pagination
+        cursors.
+      operationId: getChargingStations
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of stations to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns stations after this ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns stations before this ID.
+        - in: query
+          name: bbox
+          required: false
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?,\-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Optional bounding box filter in the format
+            `minLng,minLat,maxLng,maxLat` to return stations inside a geographic
+            rectangle.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (e.g., `expand[]=connectors`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with station list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Array of ChargingStation objects.
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                  has_more:
+                    type: boolean
+                    description: True if more pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List charging stations
+  /charging_stations/{charging_station}:
+    get:
+      description: >
+        Retrieves a single ChargingStation object by its unique ID.  
+        The response includes address, connectors, live availability, pricing,
+        and operator metadata.
+      operationId: getChargingStationsChargingStation
+      parameters:
+        - in: path
+          name: charging_station
+          required: true
+          schema:
+            type: string
+          description: ID of the charging station to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (e.g., `expand[]=connectors`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Charging station successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/charging_station'
+        '404':
+          description: Charging station not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve a charging station
+  /drivers:
+    get:
+      description: >
+        Returns a paginated list of Driver objects, ordered by creation date
+        with the most recent drivers first.
+      operationId: getDrivers
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of drivers to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns records after this driver ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns records before this driver ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies which fields in each driver object to expand.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with driver list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/driver'
+                    description: Array of Driver objects.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List drivers
+    post:
+      description: >
+        Creates a new Driver object.  
+        Drivers store personal, licensing, and notification preferences so you
+        can track who is responsible for vehicle usage and charging sessions.
+      operationId: postDrivers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  description: Full name of the driver.
+                email:
+                  type: string
+                  description: Contact email address.
+                phone:
+                  type: string
+                  description: Optional phone number.
+                license_number:
+                  type: string
+                  description: Driver’s license or certification number.
+                preferences:
+                  $ref: '#/components/schemas/driver/properties/preferences'
+                metadata:
+                  type: object
+                  description: Custom key-value pairs for integration needs.
+              required:
+                - name
+                - email
+      responses:
+        '200':
+          description: Driver successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Create a driver
+  /drivers/{driver}:
+    delete:
+      description: >
+        Permanently deletes a Driver object and removes its association with all
+        vehicles and sessions.  
+        This action can’t be undone, but historical session data remains for
+        reporting.
+      operationId: deleteDriversDriver
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to delete.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Driver successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted driver
+                  object:
+                    type: string
+                    enum: [driver]
+                    description: Always `driver`
+                  deleted:
+                    type: boolean
+                    description: Always `true`
+                required: [id, object, deleted]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Delete a driver
+    get:
+      description: >
+        Fetches a Driver object by its unique ID.  
+        Use this endpoint to obtain contact details, preferences, vehicle
+        links, and wallet balance for a specific driver.
+      operationId: getDriversDriver
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in the response
+            (e.g., `expand[]=vehicles`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Driver successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve a driver
+    post:
+      description: >
+        Updates the specified Driver object by setting the values of the
+        parameters provided.  
+        Any parameters not included in the request remain unchanged.
+      operationId: postDriversDriver
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                  description: Updated full name.
+                email:
+                  type: string
+                  description: Updated contact email.
+                phone:
+                  type: string
+                  description: Updated phone number.
+                license_number:
+                  type: string
+                  description: Driver’s license number to store or update.
+                status:
+                  type: string
+                  enum: [active, suspended, archived]
+                  description: Set driver status.
+                preferences:
+                  $ref: '#/components/schemas/driver/properties/preferences'
+                metadata:
+                  type: object
+                  description: Merge or replace custom key-value metadata pairs.
+      responses:
+        '200':
+          description: Driver successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Update a driver
+  /drivers/{driver}/charging_sessions:
+    get:
+      description: >
+        Returns a paginated list of ChargingSession objects associated with the
+        specified driver, ordered by `session_started` in descending order.
+      operationId: getDriversDriverChargingSessions
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver whose sessions you want to list.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [active, completed, cancelled, failed]
+          description: Filter sessions by status.
+        - in: query
+          name: created
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: object
+                properties:
+                  gt:
+                    type: integer
+                    description: Minimum timestamp (exclusive)
+                  gte:
+                    type: integer
+                    description: Minimum timestamp (inclusive)
+                  lt:
+                    type: integer
+                    description: Maximum timestamp (exclusive)
+                  lte:
+                    type: integer
+                    description: Maximum timestamp (inclusive)
+          description: >
+            A range filter on the `created` timestamp (same format as Stripe’s
+            `created` filter).
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of sessions to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions after this ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions before this ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies fields to expand in each session object (e.g.,
+            `expand[]=charging_station`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with driver session list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_session'
+                    description: Driver’s sessions
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available
+                  url:
+                    type: string
+                    description: Endpoint URL
+                required: [object, data, has_more, url]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List driver’s charging sessions
+  /drivers/{driver}/charging_sessions/active:
+    get:
+      description: >
+        Returns all **currently active** ChargingSession objects for the
+        specified driver (sessions whose `status` is `active` and have not yet
+        been ended).
+      operationId: getDriversDriverChargingSessionsActive
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to query.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Fields to expand in each session object.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Active sessions retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_session'
+                  has_more:
+                    type: boolean
+                    description: Always `false`—active list is not paginated
+                  url:
+                    type: string
+                required: [object, data, has_more, url]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List driver’s active charging sessions
+  /drivers/{driver}/charging_stations/favorites:
+    get:
+      description: >
+        Returns a list of ChargingStation objects that the specified driver has
+        marked as favorites in the mobile or in-car application.  
+        Favorites allow drivers to quickly access preferred or frequently used
+        stations.
+      operationId: getDriversDriverChargingStationsFavorites
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver whose favorites you want to retrieve.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of stations to return (default 20).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns records after this station ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns records before this station ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies which fields to expand in each station object.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Favorite stations successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                    description: Array of favorite stations
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available
+                  url:
+                    type: string
+                    description: Endpoint URL for this list
+                required: [object, data, has_more, url]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve driver’s favorite stations
+  /drivers/{driver}/charging_stations/trip:
+    get:
+      description: >
+        Returns an ordered list of recommended ChargingStation objects located
+        along the driver’s planned trip.  
+        The route is defined by a required `origin` and `destination`
+        coordinate pair (passed as query parameters). Stations are sorted by the
+        sequence in which they appear along the route.
+      operationId: getDriversDriverChargingStationsTrip
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver planning the trip.
+        - in: query
+          name: origin
+          required: true
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Origin coordinate in `"lat,lng"` format (e.g., `37.7749,-122.4194`).
+        - in: query
+          name: destination
+          required: true
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Destination coordinate in `"lat,lng"` format.
+        - in: query
+          name: max_detour_km
+          required: false
+          schema:
+            type: number
+            format: float
+          description: >
+            Maximum detour distance in kilometers that a station can be from the
+            main route (default = 10 km).
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Fields to expand in each station object.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Route stations successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                    description: Stations ordered along the route
+                  has_more:
+                    type: boolean
+                    description: Always `false` for this route-specific list
+                  url:
+                    type: string
+                    description: Endpoint URL
+                required: [object, data, has_more, url]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve trip-route stations
+  /drivers/{driver}/vehicles:
+    get:
+      description: >
+        Returns a paginated list of Vehicle objects that are currently attached
+        to the specified driver.
+      operationId: getDriversDriverVehicles
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver whose vehicles you want to list.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of vehicles to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns vehicles after this ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns vehicles before this ID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with vehicle list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Array of Vehicle objects attached to the driver.
+                    items:
+                      $ref: '#/components/schemas/vehicle'
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List driver’s vehicles
+    post:
+      description: >
+        Links an existing Vehicle to the specified Driver.  
+        After the call succeeds, the vehicle appears in the driver’s `vehicles`
+        array and future charging sessions will attribute the driver.
+      operationId: postDriversDriverVehicles
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver who will operate the vehicle.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                vehicle:
+                  type: string
+                  description: ID of the vehicle to attach.
+              required: [vehicle]
+      responses:
+        '200':
+          description: Vehicle successfully attached to driver.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        '404':
+          description: Driver or vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '409':
+          description: Vehicle already attached to the driver.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Attach a vehicle to a driver
+  /drivers/{driver}/vehicles/{vehicle}/detach:
+    post:
+      description: >
+        Removes the association between the specified Vehicle and Driver.
+        After detachment, the vehicle will no longer appear in the driver’s
+        `vehicles` list and future sessions won’t automatically attribute the
+        driver.
+      operationId: postDriversDriverVehiclesVehicleDetach
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to detach from.
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle to detach.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Vehicle successfully detached from driver.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        '404':
+          description: Driver or vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Detach a vehicle from a driver
+  /estimations:
+    post:
+      description: >
+        Generates a real-time cost estimate for a potential charging session.
+        Clients provide the proposed charging goal (current SoC → target SoC)
+        plus the station and vehicle context. The response breaks down expected
+        energy, duration, and pricing components so drivers know what to expect
+        before they plug in.
+      operationId: postEstimations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                charging_station:
+                  type: string
+                  description: ID of the charging station being evaluated.
+                vehicle:
+                  type: string
+                  description: ID of the vehicle to use for battery capacity and connector checks.
+                soc_current:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                  description: Current state-of-charge (percentage) of the vehicle battery.
+                soc_target:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  description: Desired target state-of-charge after charging completes.
+                currency:
+                  type: string
+                  description: >
+                    Optional ISO 4217 currency code to override station default
+                    (e.g., `usd`). If omitted, uses station’s currency.
+              required:
+                - charging_station
+                - vehicle
+                - soc_current
+                - soc_target
+      responses:
+        '200':
+          description: Estimation successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/estimation'
+        '400':
+          description: Validation error (e.g., incompatible connector, invalid SoC range).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Create a cost estimation
+  /estimations/{estimation}:
+    get:
+      description: >
+        Retrieves a previously generated Estimation object by its unique ID.  
+        Use this endpoint to confirm pricing details or to display the estimate
+        again without recalculating.
+      operationId: getEstimationsEstimation
+      parameters:
+        - in: path
+          name: estimation
+          required: true
+          schema:
+            type: string
+          description: ID of the estimation to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (e.g., `expand[]=charging_station`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Estimation successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/estimation'
+        '404':
+          description: Estimation not found or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve an estimation
   /fleets:
     post:
-      summary: Create a fleet
-      operationId: postFleets
       description: >
         Creates a new Fleet object under the authenticated Account.  
         Use fleets to group vehicles and drivers by region, depot, or business
         unit, and to apply common billing and reporting preferences.
+      operationId: postFleets
       requestBody:
         required: true
         content:
@@ -1722,6 +3178,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+      summary: Create a fleet
   /fleets/{fleet}:
     delete:
       description: >
@@ -1892,6 +3349,181 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: Update a fleet
+  /fleets/{fleet}/charging_sessions:
+    get:
+      description: >
+        Returns a paginated list of ChargingSession objects for every driver
+        and vehicle in the specified fleet. Results are ordered by
+        `session_started` (newest first) and can be filtered by status or date
+        range.
+      operationId: getFleetsFleetChargingSessions
+      parameters:
+        - in: path
+          name: fleet
+          required: true
+          schema:
+            type: string
+          description: ID of the fleet to query.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [active, completed, cancelled, failed]
+          description: Filter sessions by status.
+        - in: query
+          name: created
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: object
+                properties:
+                  gt:
+                    type: integer
+                    description: Minimum timestamp (exclusive)
+                  gte:
+                    type: integer
+                    description: Minimum timestamp (inclusive)
+                  lt:
+                    type: integer
+                    description: Maximum timestamp (exclusive)
+                  lte:
+                    type: integer
+                    description: Maximum timestamp (inclusive)
+          description: Range filter on `created` timestamp.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of sessions to return (default 10).
+        - in: query
+          name: starting_after
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions after this ID.
+        - in: query
+          name: ending_before
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions before this ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+          description: Fields to expand in each session object.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with fleet session list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_session'
+                  has_more:
+                    type: boolean
+                  url:
+                    type: string
+                required: [object, data, has_more, url]
+        '404':
+          description: Fleet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List fleet’s charging sessions
+  /fleets/{fleet}/charging_sessions/active:
+    get:
+      description: >
+        Returns all active ChargingSession objects across every driver and
+        vehicle in the specified fleet.
+      operationId: getFleetsFleetChargingSessionsActive
+      parameters:
+        - in: path
+          name: fleet
+          required: true
+          schema:
+            type: string
+          description: ID of the fleet to query.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Fields to expand in each session object.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Active fleet sessions retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_session'
+                  has_more:
+                    type: boolean
+                    description: Always `false`
+                  url:
+                    type: string
+                required: [object, data, has_more, url]
+        '404':
+          description: Fleet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List fleet’s active charging sessions
   /fleets/{fleet}/drivers:
     get:
       description: >
@@ -2156,85 +3788,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: Add a vehicle to a fleet
-  /drivers:
-    post:
-      summary: Create a driver
-      operationId: createDriver
-      responses:
-        "200":
-          description: A newly created driver.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/driver"
   /vehicles:
     post:
-      summary: Create a vehicle
-      operationId: createVehicle
-      responses:
-        "200":
-          description: A newly created vehicle.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/vehicle"
-  /vehicle_telemetries:
-    post:
-      summary: Create a vehicle telemetry
-      operationId: createVehicleTelemetry
-      responses:
-        "200":
-          description: A newly created vehicle_telemetrie.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/vehicle_telemetry"
-  /charging_stations:
-    post:
-      summary: Create a charging station
-      operationId: postChargingStations
-      responses:
-        "200":
-          description: A newly created charging_station.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/charging_station"
-  /charging_sessions:
-    post:
-      summary: Create a charging session
-      operationId: postChargingSessions
-      responses:
-        "200":
-          description: A newly created charging_session.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/charging_session"
-  /charging_sessions/{charging_session}:
-    get:
       description: >
-        Retrieves a Charging Session
-      operationId: getChargingSessionsChargingSession
+        Creates a new Vehicle object.  
+        Vehicles represent EVs in the Charge platform and are used to track
+        state-of-charge, telemetry, and charging sessions across stations.
+      operationId: postVehicles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                vin:
+                  type: string
+                  description: Vehicle Identification Number (VIN).
+                battery_capacity:
+                  type: integer
+                  description: Battery capacity in watt-hours (Wh).
+                charging_standard:
+                  type: string
+                  enum: [CCS, CHAdeMO, Type2]
+                  description: Primary charging standard supported.
+                information:
+                  $ref: '#/components/schemas/vehicle/properties/information'
+                registration_plate:
+                  type: string
+                  description: License-plate / registration number.
+                metadata:
+                  type: object
+                  description: Custom key-value pairs (color, nickname, etc.).
+              required:
+                - vin
+                - battery_capacity
+                - charging_standard
+      responses:
+        '200':
+          description: Vehicle successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Create a vehicle
+  /vehicles/{vehicle}:
+    delete:
+      description: >
+        Permanently deletes a Vehicle object and removes all driver links.  
+        Historical charging sessions remain available for reporting, but the
+        vehicle will no longer appear in list endpoints.
+      operationId: deleteVehiclesVehicle
       parameters:
         - in: path
-          name: charging_session
+          name: vehicle
           required: true
           schema:
             type: string
-          description: ID of the Charging session to retrieve.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Specifies which related objects to expand in the response
-            (e.g., `expand[]=address`).
+          description: ID of the vehicle to delete.
       requestBody:
         required: false
         content:
@@ -2245,13 +3863,25 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Charging session successfully retrieved.
+          description: Vehicle successfully deleted.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/charging_session'
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted vehicle
+                  object:
+                    type: string
+                    enum: [vehicle]
+                    description: Always `vehicle`
+                  deleted:
+                    type: boolean
+                    description: Always `true`
+                required: [id, object, deleted]
         '404':
-          description: Charging session not found.
+          description: Vehicle not found.
           content:
             application/json:
               schema:
@@ -2262,7 +3892,762 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-      summary: Retrieve a charging session
+      summary: Delete a vehicle
+    get:
+      description: >
+        Retrieves a Vehicle object by its unique ID.  
+        The response includes core specs, registration info, telemetry link,
+        and any drivers currently associated with the vehicle.
+      operationId: getVehiclesVehicle
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (e.g., `expand[]=drivers`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Vehicle successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '404':
+          description: Vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Retrieve a vehicle
+    post:
+      description: >
+        Updates the specified Vehicle object by setting the values of the
+        parameters provided. Any parameters not included remain unchanged.
+      operationId: postVehiclesVehicle
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                battery_capacity:
+                  type: integer
+                  description: Updated battery capacity in Wh.
+                charging_standard:
+                  type: string
+                  enum: [CCS, CHAdeMO, Type2]
+                  description: Change the primary charging standard.
+                information:
+                  $ref: '#/components/schemas/vehicle/properties/information'
+                registration_plate:
+                  type: string
+                  description: Update license-plate / registration number.
+                status:
+                  type: string
+                  enum: [active, inactive, retired]
+                  description: Set lifecycle status of the vehicle.
+                metadata:
+                  type: object
+                  description: Merge or replace custom key-value metadata.
+      responses:
+        '200':
+          description: Vehicle successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '404':
+          description: Vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Update a vehicle
+  /vehicles/{vehicle}/charging_sessions:
+    get:
+      description: >
+        Returns a paginated list of ChargingSession objects associated with the
+        specified vehicle, ordered by `session_started` (most recent first).
+      operationId: getVehiclesVehicleChargingSessions
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle whose sessions you want to list.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [active, completed, cancelled, failed]
+          description: Filter sessions by current status.
+        - in: query
+          name: created
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: object
+                properties:
+                  gt:
+                    type: integer
+                    description: Minimum timestamp (exclusive)
+                  gte:
+                    type: integer
+                    description: Minimum timestamp (inclusive)
+                  lt:
+                    type: integer
+                    description: Maximum timestamp (exclusive)
+                  lte:
+                    type: integer
+                    description: Maximum timestamp (inclusive)
+          description: >
+            Range filter on the `created` timestamp (same format as Stripe’s
+            range queries).
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of sessions to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions after this ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns sessions before this ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Fields to expand in each session object (e.g.,
+            `expand[]=charging_station`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Vehicle sessions successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Array of ChargingSession objects for this vehicle.
+                    items:
+                      $ref: '#/components/schemas/charging_session'
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        '404':
+          description: Vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List vehicle’s charging sessions
+  /vehicles/{vehicle}/charging_stations/availability:
+    get:
+      description: >
+        Returns ChargingStation objects that are **both** compatible with the
+        vehicle’s connector requirements **and** currently have at least one
+        connector available.  
+        Use this endpoint to guide drivers to stations they can plug into
+        immediately.
+      operationId: getVehiclesVehicleChargingStationsAvailability
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle used for compatibility filtering.
+        - in: query
+          name: radius_meters
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 100000
+          description: >
+            Search radius in meters around the vehicle’s latest GPS location.
+            Default = 5 000 m.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of stations to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items after this station ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items before this station ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Fields to expand in each station object (e.g., `expand[]=availability`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Available & compatible stations retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Stations that meet compatibility **and** availability criteria.
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                  has_more:
+                    type: boolean
+                    description: True if more results exist beyond `limit`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        '404':
+          description: Vehicle not found or lacks location/connector data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List available & compatible stations
+  /vehicles/{vehicle}/charging_stations/compatible:
+    get:
+      description: >
+        Returns ChargingStation objects that support at least one of the
+        vehicle’s supported connector types and power requirements.  
+        Use this endpoint to filter out incompatible stations from search
+        results or maps.
+      operationId: getVehiclesVehicleChargingStationsCompatible
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle whose compatibility specs are used.
+        - in: query
+          name: radius_meters
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 100000
+          description: >
+            Optional search radius in meters around the vehicle’s latest GPS
+            location (derived from telemetry). If omitted, returns all
+            compatible stations globally (paginated).
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of stations to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items after this station ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items before this station ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Fields to expand in each station object (e.g., `expand[]=connectors`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Compatible stations successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                    description: Compatible stations matching vehicle specs
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available
+                  url:
+                    type: string
+                    description: Endpoint URL for this list
+                required: [object, data, has_more, url]
+        '404':
+          description: Vehicle not found or lacks connector information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List compatible stations for a vehicle
+  /vehicles/{vehicle}/charging_stations/nearby:
+    get:
+      description: >
+        Returns a list of ChargingStation objects ordered by distance from the
+        specified vehicle’s current GPS position (derived from the vehicle’s
+        latest telemetry). Use this endpoint to suggest the closest stations to
+        a driver in real time.
+      operationId: getVehiclesVehicleChargingStationsNearby
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle whose location is used.
+        - in: query
+          name: radius_meters
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 100000
+          description: >
+            Search radius in meters (default 5 000 m). Only stations within this
+            radius are returned.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+          description: Maximum number of stations to return (default 10).
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Fields to expand in each station object (e.g., `expand[]=availability`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Nearby stations successfully retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/charging_station'
+                    description: Stations sorted by ascending distance.
+                  has_more:
+                    type: boolean
+                    description: True if more results are available beyond `limit`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        '404':
+          description: Vehicle not found or no telemetry location available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List stations near a vehicle
+  /vehicles/{vehicle}/drivers:
+    get:
+      description: >
+        Returns a paginated list of Driver objects currently linked to the
+        specified vehicle.
+      operationId: getVehiclesVehicleIdDrivers
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle whose drivers you want to list.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of drivers to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns drivers after this ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns drivers before this ID.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Successful response with driver list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Array of Driver objects attached to the vehicle.
+                    items:
+                      $ref: '#/components/schemas/driver'
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+        '404':
+          description: Vehicle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: List vehicle’s drivers
+    post:
+      description: >
+        Links an existing Driver to the specified Vehicle.  
+        Once attached, the driver will appear in the vehicle’s `drivers` array
+        and future charging sessions will attribute the driver.
+      operationId: postVehiclesVehicleDriversAttach
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle that the driver will operate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                driver:
+                  type: string
+                  description: ID of the driver to attach.
+              required: [driver]
+      responses:
+        '200':
+          description: Driver successfully attached to vehicle.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '404':
+          description: Vehicle or driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '409':
+          description: Driver already attached to the vehicle.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Attach a driver to a vehicle
+  /vehicles/{vehicle}/drivers/{driver}/detach:
+    post:
+      description: >
+        Removes the association between the specified Driver and Vehicle.  
+        After the detachment, the driver will no longer appear in the vehicle’s
+        `drivers` list and future sessions won’t automatically attribute the
+        driver to this vehicle.
+      operationId: postVehiclesVehicleDriversDriverDetach
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle to detach from.
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to detach.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Driver successfully detached from vehicle.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '404':
+          description: Vehicle or driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Detach a driver from a vehicle
+  /vehicles/{vehicle}/telemetry:
+    get:
+      summary: Get real-time telemetry
+      operationId: getVehiclesVehicleTelemetry
+      description: >
+        Retrieves the most recent VehicleTelemetry object for the specified
+        vehicle.  
+        Telemetry includes battery state-of-charge, estimated range, GPS
+        coordinates, odometer, and other runtime data points.
+      parameters:
+        - in: path
+          name: vehicle
+          required: true
+          schema:
+            type: string
+          description: ID of the vehicle whose telemetry you want to fetch.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies fields to expand (e.g., `expand[]=battery`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Latest telemetry successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle_telemetry'
+        '404':
+          description: Vehicle or telemetry not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /transactions:
     post:
       summary: Create a transaction
@@ -2329,22 +4714,3 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/payment_method"
-  /estimations:
-    post:
-      summary: Create a estimation
-      operationId: createEstimation
-      requestBody:
-        $ref: "#/components/schemas/estimation"
-      responses:
-        "200":
-          description: A newly created estimation.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/estimation"
-        "401":
-          description: Lol.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/estimation"
