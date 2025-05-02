@@ -2139,7 +2139,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-      summary: List charging stations with flexible filtering
+      summary: List charging stations
   /charging_stations/{charging_station}:
     get:
       description: >
