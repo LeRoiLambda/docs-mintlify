@@ -31,11 +31,6 @@
                 "pages": [
                   "api/charging_stations/object",
                   "api/charging_stations/retrieve",
-                  "api/charging_stations/available",
-                  "api/charging_stations/compatible",
-                  "api/charging_stations/favorite",
-                  "api/charging_stations/trip",
-                  "api/charging_stations/list_vehicle",
                   "api/charging_stations/list"
                 ]
               },

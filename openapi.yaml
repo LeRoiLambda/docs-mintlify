@@ -930,10 +930,6 @@ components:
                 type: string
                 description: Unique identifier for the connector.
                 example: null
-              object:
-                type: string
-                description: Always `connector`.
-                example: null
               power:
                 type: integer
                 description: Maximum power output in kW.
@@ -967,26 +963,18 @@ components:
               format: float
               description: Longitude of the charging station.
               example: null
-        information:
-          type: object
-          description: Metadata about the operator or network that manages the station.
-          properties:
-            network_name:
-              type: string
-              description: Name of the network providing this station.
-              example: null
-            operator_name:
-              type: string
-              description: Name of the company operating the station.
-              example: null
-            operator_contact:
-              type: string
-              description: Contact information for station support or issues.
-              example: null
         name:
           type: string
           nullable: true
           description: Optional user-facing name for the station.
+          example: null
+        operator:
+          type: string
+          description: Name of the operator (CPO).
+          example: null
+        operator_contact:
+          type: string
+          description: Contact information for station support or issues.
           example: null
         pricing:
           type: array
@@ -2030,8 +2018,8 @@ paths:
       description: >
         Returns a paginated list of ChargingStation objects, sorted by creation
         date with the most recently added stations first.  
-        You can filter the results by geographic bounding box or pagination
-        cursors.
+        You can filter the results by geographic location and radius, vehicle compatibility,
+        availability, proximity, driver favorites, or route-based parameters.
       operationId: getChargingStations
       parameters:
         - in: query
@@ -2055,37 +2043,75 @@ paths:
             type: string
           description: Cursor for pagination; returns stations before this ID.
         - in: query
-          name: bbox
+          name: longitude
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Longitude for geographic filtering. Requires `lat` and `radius_meters`.
+        - in: query
+          name: latitude
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Latitude for geographic filtering. Requires `lng` and `radius_meters`.
+        - in: query
+          name: radius
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 100000
+          description: >
+            Search radius around the provided latitude and longitude.
+        - in: query
+          name: vehicle
           required: false
           schema:
             type: string
-            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?,\-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
           description: >
-            Optional bounding box filter in the format
-            `minLng,minLat,maxLng,maxLat` to return stations inside a geographic
-            rectangle.
+            Filters stations compatible with the vehicle’s connector type and power requirements.
         - in: query
-          name: expand
-          style: form
-          explode: true
+          name: available
           required: false
           schema:
-            type: array
-            items:
-              type: string
+            type: boolean
           description: >
-            Specifies related objects to expand (e.g., `expand[]=connectors`).
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
+            If true, only stations with at least one currently available connector are returned.
+        - in: query
+          name: driver
+          required: false
+          schema:
+            type: string
+          description: >
+            Returns only stations marked as favorites by the specified driver.
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Origin coordinates `lat,lng` for route-based station recommendations. Requires `destination`.
+        - in: query
+          name: destination
+          required: false
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Destination coordinates `lat,lng` for route-based station recommendations. Requires `origin`.
+        - in: query
+          name: max_detour_km
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Maximum allowable detour from route in kilometers (default 10 km).
       responses:
         '200':
-          description: Successful response with station list.
+          description: Successful response with filtered station list.
           content:
             application/json:
               schema:
@@ -2113,7 +2139,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-      summary: List charging stations
+      summary: List charging stations with flexible filtering
   /charging_stations/{charging_station}:
     get:
       description: >
@@ -2128,17 +2154,6 @@ paths:
           schema:
             type: string
           description: ID of the charging station to retrieve.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Specifies related objects to expand (e.g., `expand[]=connectors`).
       requestBody:
         required: false
         content:
@@ -2649,193 +2664,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List driver’s active charging sessions
-  /drivers/{driver}/charging_stations/favorites:
-    get:
-      description: >
-        Returns a list of ChargingStation objects that the specified driver has
-        marked as favorites in the mobile or in-car application.  
-        Favorites allow drivers to quickly access preferred or frequently used
-        stations.
-      operationId: getDriversDriverChargingStationsFavorites
-      parameters:
-        - in: path
-          name: driver
-          required: true
-          schema:
-            type: string
-          description: ID of the driver whose favorites you want to retrieve.
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of stations to return (default 20).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns records after this station ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns records before this station ID.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Specifies which fields to expand in each station object.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Favorite stations successfully retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                    description: Array of favorite stations
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available
-                  url:
-                    type: string
-                    description: Endpoint URL for this list
-                required: [object, data, has_more, url]
-        '404':
-          description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: Retrieve driver’s favorite stations
-  /drivers/{driver}/charging_stations/trip:
-    get:
-      description: >
-        Returns an ordered list of recommended ChargingStation objects located
-        along the driver’s planned trip.  
-        The route is defined by a required `origin` and `destination`
-        coordinate pair (passed as query parameters). Stations are sorted by the
-        sequence in which they appear along the route.
-      operationId: getDriversDriverChargingStationsTrip
-      parameters:
-        - in: path
-          name: driver
-          required: true
-          schema:
-            type: string
-          description: ID of the driver planning the trip.
-        - in: query
-          name: origin
-          required: true
-          schema:
-            type: string
-            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
-          description: >
-            Origin coordinate in `"lat,lng"` format (e.g., `37.7749,-122.4194`).
-        - in: query
-          name: destination
-          required: true
-          schema:
-            type: string
-            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
-          description: >
-            Destination coordinate in `"lat,lng"` format.
-        - in: query
-          name: max_detour_km
-          required: false
-          schema:
-            type: number
-            format: float
-          description: >
-            Maximum detour distance in kilometers that a station can be from the
-            main route (default = 10 km).
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: Fields to expand in each station object.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Route stations successfully retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                    description: Stations ordered along the route
-                  has_more:
-                    type: boolean
-                    description: Always `false` for this route-specific list
-                  url:
-                    type: string
-                    description: Endpoint URL
-                required: [object, data, has_more, url]
-        '404':
-          description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: Retrieve trip-route stations
   /drivers/{driver}/vehicles:
     get:
       description: >
@@ -4124,298 +3952,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List vehicle’s charging sessions
-  /vehicles/{vehicle}/charging_stations/availability:
-    get:
-      description: >
-        Returns ChargingStation objects that are **both** compatible with the
-        vehicle’s connector requirements **and** currently have at least one
-        connector available.  
-        Use this endpoint to guide drivers to stations they can plug into
-        immediately.
-      operationId: getVehiclesVehicleChargingStationsAvailability
-      parameters:
-        - in: path
-          name: vehicle
-          required: true
-          schema:
-            type: string
-          description: ID of the vehicle used for compatibility filtering.
-        - in: query
-          name: radius_meters
-          required: false
-          schema:
-            type: integer
-            minimum: 100
-            maximum: 100000
-          description: >
-            Search radius in meters around the vehicle’s latest GPS location.
-            Default = 5 000 m.
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of stations to return (default 10).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Pagination cursor; returns items after this station ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Pagination cursor; returns items before this station ID.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: Fields to expand in each station object (e.g., `expand[]=availability`).
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Available & compatible stations retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    description: Stations that meet compatibility **and** availability criteria.
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                  has_more:
-                    type: boolean
-                    description: True if more results exist beyond `limit`.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
-                required: [object, data, has_more, url]
-        '404':
-          description: Vehicle not found or lacks location/connector data.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List available & compatible stations
-  /vehicles/{vehicle}/charging_stations/compatible:
-    get:
-      description: >
-        Returns ChargingStation objects that support at least one of the
-        vehicle’s supported connector types and power requirements.  
-        Use this endpoint to filter out incompatible stations from search
-        results or maps.
-      operationId: getVehiclesVehicleChargingStationsCompatible
-      parameters:
-        - in: path
-          name: vehicle
-          required: true
-          schema:
-            type: string
-          description: ID of the vehicle whose compatibility specs are used.
-        - in: query
-          name: radius_meters
-          required: false
-          schema:
-            type: integer
-            minimum: 100
-            maximum: 100000
-          description: >
-            Optional search radius in meters around the vehicle’s latest GPS
-            location (derived from telemetry). If omitted, returns all
-            compatible stations globally (paginated).
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of stations to return (default 10).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Pagination cursor; returns items after this station ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Pagination cursor; returns items before this station ID.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Fields to expand in each station object (e.g., `expand[]=connectors`).
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Compatible stations successfully retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                    description: Compatible stations matching vehicle specs
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available
-                  url:
-                    type: string
-                    description: Endpoint URL for this list
-                required: [object, data, has_more, url]
-        '404':
-          description: Vehicle not found or lacks connector information.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List compatible stations for a vehicle
-  /vehicles/{vehicle}/charging_stations/nearby:
-    get:
-      description: >
-        Returns a list of ChargingStation objects ordered by distance from the
-        specified vehicle’s current GPS position (derived from the vehicle’s
-        latest telemetry). Use this endpoint to suggest the closest stations to
-        a driver in real time.
-      operationId: getVehiclesVehicleChargingStationsNearby
-      parameters:
-        - in: path
-          name: vehicle
-          required: true
-          schema:
-            type: string
-          description: ID of the vehicle whose location is used.
-        - in: query
-          name: radius_meters
-          required: false
-          schema:
-            type: integer
-            minimum: 100
-            maximum: 100000
-          description: >
-            Search radius in meters (default 5 000 m). Only stations within this
-            radius are returned.
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 50
-          description: Maximum number of stations to return (default 10).
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Fields to expand in each station object (e.g., `expand[]=availability`).
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Nearby stations successfully retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                    description: Stations sorted by ascending distance.
-                  has_more:
-                    type: boolean
-                    description: True if more results are available beyond `limit`.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
-                required: [object, data, has_more, url]
-        '404':
-          description: Vehicle not found or no telemetry location available.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List stations near a vehicle
   /vehicles/{vehicle}/drivers:
     get:
       description: >
