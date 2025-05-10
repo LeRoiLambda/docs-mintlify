@@ -132,7 +132,7 @@ components:
               type: string
               description: Billing cycle preference (`monthly`, `weekly`, etc.).
               example: null
-            charging_notifications:
+            notifications:
               type: boolean
               description: Whether the account receives charging session notifications.
               example: null
@@ -452,7 +452,7 @@ components:
               type: string
               description: Frequency of billing for the fleet (`monthly`, `weekly`, etc.).
               example: null
-            charging_notifications:
+            notifications:
               type: boolean
               description: >-
                 Whether drivers in this fleet receive session status
@@ -562,7 +562,7 @@ components:
               type: string
               description: Preferred charging speed (e.g., `slow`, `fast`, `ultrafast`).
               example: null
-            charging_notifications:
+            notifications:
               type: boolean
               description: >-
                 Whether to receive notifications about charging status and
@@ -590,7 +590,7 @@ components:
                 type: string
               description: List of preferred charging network (CPO) IDs.
               example: null
-            preferred_stations:
+            preferred_charging_stations:
               type: array
               items:
                 type: string
@@ -2048,21 +2048,21 @@ paths:
           schema:
             type: number
             format: float
-          description: Longitude for geographic filtering. Requires `lat` and `radius_meters`.
+          description: Longitude for geographic filtering. Requires `latitude` and `radius`.
         - in: query
           name: latitude
           required: false
           schema:
             type: number
             format: float
-          description: Latitude for geographic filtering. Requires `lng` and `radius_meters`.
+          description: Latitude for geographic filtering. Requires `longitude` and `radius`.
         - in: query
           name: radius
           required: false
           schema:
             type: integer
             minimum: 100
-            maximum: 100000
+            maximum: 10000
           description: >
             Search radius around the provided latitude and longitude.
         - in: query
@@ -3483,7 +3483,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-      summary: Add a driver to a fleet
+      summary: Attach a driver to a fleet
+  /fleets/{fleet}/drivers/{driver}/detach:
+    post:
+      description: >
+        Removes the association between the specified Driver and Fleet.  
+        After the detachment, the driver will no longer appear in the fleet’s
+        `drivers` list.
+      operationId: postFleesFleetDriversDriverDetach
+      parameters:
+        - in: path
+          name: fleet
+          required: true
+          schema:
+            type: string
+          description: ID of the fleet to detach from.
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver to detach.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Driver successfully detached from Fleet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/driver'
+        '404':
+          description: Fleet or driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+      summary: Detach a driver from a fleet
   /fleets/{fleet}/vehicles:
     get:
       summary: List fleet’s vehicles

@@ -46,6 +46,7 @@
                   "api/drivers/list",
                   "api/drivers/delete",
                   "api/drivers/attach_fleet",
+                  "api/drivers/detach_fleet",
                   "api/drivers/attach_vehicle",
                   "api/drivers/detach_vehicle"
                 ]
