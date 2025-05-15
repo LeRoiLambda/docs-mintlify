@@ -45,10 +45,8 @@
                   "api/drivers/list_vehicle",
                   "api/drivers/list",
                   "api/drivers/delete",
-                  "api/drivers/attach_fleet",
-                  "api/drivers/detach_fleet",
-                  "api/drivers/attach_vehicle",
-                  "api/drivers/detach_vehicle"
+                  "api/drivers/attach",
+                  "api/drivers/detach"
                 ]
               },
               {
@@ -99,8 +97,8 @@
                   "api/vehicles/list_driver",
                   "api/vehicles/list_fleet",
                   "api/vehicles/delete",
-                  "api/vehicles/attach_driver",
                   "api/vehicles/attach_fleet",
+                  "api/vehicles/attach_driver",
                   "api/vehicles/detach_driver"
                 ]
               },
