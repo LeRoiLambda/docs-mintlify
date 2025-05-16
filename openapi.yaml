@@ -1037,6 +1037,12 @@ components:
             Total cost of the charging session, in the smallest currency unit
             (e.g., cents).
           example: null
+        amount_paid:
+          type: integer
+          description: >-
+            Amount already paid for the charging session, in the smallest currency unit
+            (e.g., cents).
+          example: null
         authorization:
           type: string
           nullable: true
@@ -1106,6 +1112,10 @@ components:
           type: integer
           format: unix-time
           description: Time at which the session was last updated.
+          example: null
+        vehicle:
+          type: string
+          description: ID of the vehicle's driver who initiated the session.
           example: null
     transaction:
       type: object
@@ -1854,7 +1864,7 @@ paths:
                   description: >
                     ID of the payment method to authorize and bill for this
                     session.
-                session_limit_wh:
+                session_limit:
                   type: integer
                   description: >
                     Optional energy limit in watt-hours to auto-stop charging
@@ -1982,7 +1992,7 @@ paths:
                   type: string
                   enum: [driver_request, vehicle_full, station_error, idle_timeout]
                   description: Optional reason why the session was terminated.
-                meter_wh:
+                meter:
                   type: integer
                   description: >
                     Optional final meter reading in watt-hours, if provided by
@@ -2023,6 +2033,41 @@ paths:
       operationId: getChargingStations
       parameters:
         - in: query
+          name: available
+          required: false
+          schema:
+            type: boolean
+          description: >
+            If true, only stations with at least one currently available connector are returned.
+        - in: query
+          name: destination
+          required: false
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Destination coordinates `lat,lng` for route-based station recommendations. Requires `origin`.
+        - in: query
+          name: driver
+          required: false
+          schema:
+            type: string
+          description: >
+            Returns only stations marked as favorites by the specified driver.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns stations before this ID.
+        - in: query
+          name: latitude
+          required: false
+          schema:
+            type: number
+            format: float
+          description: Latitude for geographic filtering. Requires `longitude` and `radius`.
+        - in: query
           name: limit
           required: false
           schema:
@@ -2031,18 +2076,6 @@ paths:
             maximum: 100
           description: Maximum number of stations to return (default 10).
         - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns stations after this ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns stations before this ID.
-        - in: query
           name: longitude
           required: false
           schema:
@@ -2050,12 +2083,26 @@ paths:
             format: float
           description: Longitude for geographic filtering. Requires `latitude` and `radius`.
         - in: query
-          name: latitude
+          name: max_detour
           required: false
           schema:
             type: number
             format: float
-          description: Latitude for geographic filtering. Requires `longitude` and `radius`.
+          description: Maximum allowable detour from route in kilometers (default 10 km).
+        - in: query
+          name: origin
+          required: false
+          schema:
+            type: string
+            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
+          description: >
+            Origin coordinates `lat,lng` for route-based station recommendations. Requires `destination`.
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns stations after this ID.
         - in: query
           name: radius
           required: false
@@ -2072,73 +2119,38 @@ paths:
             type: string
           description: >
             Filters stations compatible with the vehicle’s connector type and power requirements.
-        - in: query
-          name: available
-          required: false
-          schema:
-            type: boolean
-          description: >
-            If true, only stations with at least one currently available connector are returned.
-        - in: query
-          name: driver
-          required: false
-          schema:
-            type: string
-          description: >
-            Returns only stations marked as favorites by the specified driver.
-        - in: query
-          name: origin
-          required: false
-          schema:
-            type: string
-            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
-          description: >
-            Origin coordinates `lat,lng` for route-based station recommendations. Requires `destination`.
-        - in: query
-          name: destination
-          required: false
-          schema:
-            type: string
-            pattern: '^-?\d+(\.\d+)?,-?\d+(\.\d+)?$'
-          description: >
-            Destination coordinates `lat,lng` for route-based station recommendations. Requires `origin`.
-        - in: query
-          name: max_detour_km
-          required: false
-          schema:
-            type: number
-            format: float
-          description: Maximum allowable detour from route in kilometers (default 10 km).
       responses:
         '200':
-          description: Successful response with filtered station list.
           content:
             application/json:
               schema:
-                type: object
                 properties:
                   object:
-                    type: string
+                    description: >-
+                      String representing the object's type. Objects of the same
+                      type share the same value. Always has the value `list`.
                     enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    description: Array of ChargingStation objects.
-                    items:
-                      $ref: '#/components/schemas/charging_station'
-                  has_more:
-                    type: boolean
-                    description: True if more pages are available.
-                  url:
                     type: string
+                  url:
                     description: Endpoint URL for this list.
-                required: [object, data, has_more, url]
+                    type: string
+                  has_more:
+                    description: True if more pages are available.
+                    type: boolean
+                  data:
+                    items:
+                      description: 'A dictionary with a data property that contains an array of up to limit charging stations, starting after charging station starting_after. Each entry in the array is a separate charging station object. If no more charging stations are available, the resulting array will be empty.'
+                      $ref: '#/components/schemas/charging_station'
+                    type: array
+                required: [data, has_more, object, url]
+                type: object
+          description: Successful response.
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: List charging stations
   /charging_stations/{charging_station}:
     get:
