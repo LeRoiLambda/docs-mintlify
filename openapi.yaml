@@ -1043,13 +1043,6 @@ components:
             Amount already paid for the charging session, in the smallest currency unit
             (e.g., cents).
           example: null
-        authorization:
-          type: string
-          nullable: true
-          description: >-
-            ID of the authorization or token used to initiate the session, if
-            applicable.
-          example: null
         charging_station:
           type: string
           description: ID of the charging station where the session occurred.
@@ -1869,9 +1862,6 @@ paths:
                   description: >
                     Optional energy limit in watt-hours to auto-stop charging
                     when reached.
-                metadata:
-                  type: object
-                  description: Custom key-value pairs for integration needs.
               required:
                 - charging_station
                 - connector
