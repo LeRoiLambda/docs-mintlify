@@ -1690,17 +1690,18 @@ paths:
                 - type
       responses:
         '200':
-          description: Account successfully created.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/account'
+          description: Returns the newly created Account object.
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Create an account
   /accounts/{account}:
     get:
@@ -1738,23 +1739,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Account successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/account'
+          description: 	Returns the Account object for a valid identifier. Raises an error otherwise.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Account not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Retrieve an account
     post:
       description: >
@@ -1804,23 +1806,24 @@ paths:
                   description: Set operational status for the account.
       responses:
         '200':
-          description: Account successfully updated.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/account'
+          description: Returns the updated Account object reflecting the supplied changes.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Account not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Update an account
   /charging_sessions:
     post:
@@ -2016,7 +2019,7 @@ paths:
   /charging_stations:
     get:
       description: >
-        Returns a paginated list of ChargingStation objects, sorted by creation
+        Returns a paginated list of Charging Station objects, sorted by creation
         date with the most recently added stations first.  
         You can filter the results by geographic location and radius, vehicle compatibility,
         availability, proximity, driver favorites, or route-based parameters.
@@ -2129,12 +2132,12 @@ paths:
                     type: boolean
                   data:
                     items:
-                      description: 'A dictionary with a data property that contains an array of up to limit charging stations, starting after charging station starting_after. Each entry in the array is a separate charging station object. If no more charging stations are available, the resulting array will be empty.'
+                      description: ''
                       $ref: '#/components/schemas/charging_station'
                     type: array
                 required: [data, has_more, object, url]
                 type: object
-          description: Successful response.
+          description: A dictionary with a data property that contains an array of up to limit charging stations, starting after charging station starting_after. Each entry in the array is a separate Charging Station object. If no more charging stations are available, the resulting array will be empty.
         default:
           content:
             application/json:
@@ -2145,7 +2148,7 @@ paths:
   /charging_stations/{charging_station}:
     get:
       description: >
-        Retrieves a single ChargingStation object by its unique ID.  
+        Retrieves a single Charging Station object by its unique ID.  
         The response includes address, connectors, live availability, pricing,
         and operator metadata.
       operationId: getChargingStationsChargingStation
@@ -2166,23 +2169,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Charging station successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/charging_station'
+          description: Returns the Charging Station object for a valid identifier. Raises an error otherwise.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Charging station not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Retrieve a charging station
   /drivers:
     get:
@@ -2232,7 +2236,6 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Successful response with driver list.
           content:
             application/json:
               schema:
@@ -2245,6 +2248,7 @@ paths:
                   data:
                     type: array
                     items:
+                      description: ''
                       $ref: '#/components/schemas/driver'
                     description: Array of Driver objects.
                   has_more:
@@ -2254,12 +2258,13 @@ paths:
                     type: string
                     description: Endpoint URL for this list.
                 required: [object, data, has_more, url]
+          description: A dictionary with a data property that contains an array of up to limit Driver objects, starting after Driver starting_after. Each entry in data is a separate Driver object. If no additional drivers are available, the array is empty.
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: List drivers
     post:
       description: >
@@ -2297,17 +2302,18 @@ paths:
                 - email
       responses:
         '200':
-          description: Driver successfully created.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/driver'
+          description: Returns the newly created Driver object.
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Create a driver
   /drivers/{driver}:
     delete:
@@ -2334,7 +2340,6 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Driver successfully deleted.
           content:
             application/json:
               schema:
@@ -2351,18 +2356,19 @@ paths:
                     type: boolean
                     description: Always `true`
                 required: [id, object, deleted]
+          description: Returns the deleted Driver object, including a deleted property set to true.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Delete a driver
     get:
       description: >
@@ -2399,23 +2405,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Driver successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/driver'
+          description: Returns the Driver object for a valid identifier. Raises an error otherwise..
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Retrieve a driver
     post:
       description: >
@@ -2461,23 +2468,24 @@ paths:
                   description: Merge or replace custom key-value metadata pairs.
       responses:
         '200':
-          description: Driver successfully updated.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/driver'
+          description: Returns the updated Driver object with all requested changes applied..
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Update a driver
   /drivers/{driver}/attach:
     post:
@@ -2507,29 +2515,30 @@ paths:
               required: [vehicle]
       responses:
         '200':
-          description: Vehicle successfully attached to driver.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/driver'
+          description: Returns the Driver object now containing the attached vehicle in its vehicles array.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver or vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle already attached to the driver.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Attach a driver to a vehicle
   /drivers/{driver}/charging_sessions:
     get:
@@ -2749,23 +2758,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Vehicle successfully detached from driver.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/driver'
+          description: Returns the Driver object with the specified vehicle removed from its vehicles array.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver or vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Detach a driver from a vehicle
   /drivers/{driver}/vehicles:
     get:
@@ -2810,7 +2820,6 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Successful response with vehicle list.
           content:
             application/json:
               schema:
@@ -2820,30 +2829,31 @@ paths:
                     type: string
                     enum: [list]
                     description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
                   data:
                     type: array
                     description: Array of Vehicle objects attached to the driver.
                     items:
                       $ref: '#/components/schemas/vehicle'
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
                 required: [object, data, has_more, url]
+          description: A dictionary with a data property that contains an array of up to limit Driver objects attached to the vehicle, starting after Driver starting_after. Each entry in data is a separate Driver object. If no additional drivers are available, the array is empty.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: List driver’s vehicles
   /estimations:
     post:
@@ -3657,17 +3667,18 @@ paths:
                 - charging_standard
       responses:
         '200':
-          description: Vehicle successfully created.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle'
+          description: Returns the newly created Vehicle object.
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Create a vehicle
   /vehicles/{vehicle}:
     delete:
@@ -3693,7 +3704,6 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Vehicle successfully deleted.
           content:
             application/json:
               schema:
@@ -3710,18 +3720,19 @@ paths:
                     type: boolean
                     description: Always `true`
                 required: [id, object, deleted]
+          description: Returns the deleted Vehicle object, including a deleted property set to true.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Delete a vehicle
     get:
       description: >
@@ -3757,23 +3768,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Vehicle successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle'
+          description: Returns the Vehicle object for a valid identifier. Raises an error otherwise.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Retrieve a vehicle
     post:
       description: >
@@ -3816,23 +3828,24 @@ paths:
                   description: Merge or replace custom key-value metadata.
       responses:
         '200':
-          description: Vehicle successfully updated.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle'
+          description: Returns the updated Vehicle object with any supplied changes applied.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Update a vehicle
   /vehicles/{vehicle}/charging_sessions:
     get:
@@ -3997,7 +4010,6 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Successful response with driver list.
           content:
             application/json:
               schema:
@@ -4007,30 +4019,32 @@ paths:
                     type: string
                     enum: [list]
                     description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
                   data:
                     type: array
                     description: Array of Driver objects attached to the vehicle.
                     items:
+                      description: ''
                       $ref: '#/components/schemas/driver'
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
                 required: [object, data, has_more, url]
+          description: A dictionary with a data property that contains an array of up to limit Vehicle objects attached to the driver, starting after Vehicle starting_after. Each entry in data is a separate Vehicle object. If no additional vehicles are available, the array is empty.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: List vehicle’s drivers
     post:
       description: >
@@ -4059,29 +4073,30 @@ paths:
               required: [driver]
       responses:
         '200':
-          description: Driver successfully attached to vehicle.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle'
+          description: Returns the Vehicle object now containing the attached driver in its drivers array.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle or driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Driver already attached to the vehicle.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Attach a vehicle to a driver
   /vehicles/{vehicle}/drivers/{driver}/detach:
     post:
@@ -4114,23 +4129,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Driver successfully detached from vehicle.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle'
+          description: Returns the Vehicle object with the specified driver removed from its drivers array.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle or driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Detach a vehicle from a driver
   /vehicles/{vehicle}/telemetry:
     get:

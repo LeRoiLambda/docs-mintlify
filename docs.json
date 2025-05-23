@@ -95,7 +95,6 @@
                   "api/vehicles/update",
                   "api/vehicles/retrieve",
                   "api/vehicles/list_driver",
-                  "api/vehicles/list_fleet",
                   "api/vehicles/delete",
                   "api/vehicles/attach_fleet",
                   "api/vehicles/attach_driver",
