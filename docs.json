@@ -140,14 +140,21 @@
                 "group": "Transactions",
                 "pages": [
                   "api/transactions/object",
-                  "api/transactions/create"
+                  "api/transactions/retrieve",
+                  "api/transactions/list",
+                  "api/transactions/list_driver",
+                  "api/transactions/list_fleet"
                 ]
               },
               {
-                "group": "Webhooks",
+                "group": "Webhook Endpoints",
                 "pages": [
-                  "api/webhooks/object",
-                  "api/webhooks/create"
+                  "api/webhook_endpoints/object",
+                  "api/webhook_endpoints/create",
+                  "api/webhook_endpoints/update",
+                  "api/webhook_endpoints/retrieve",
+                  "api/webhook_endpoints/list",
+                  "api/webhook_endpoints/delete"
                 ]
               }
             ]

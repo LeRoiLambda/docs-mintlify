@@ -1569,7 +1569,7 @@ components:
     webhook_endpoint:
       type: object
       description: >
-        A WebhookEndpoint represents a registered URL that will receive
+        A Webhook Endpoint represents a registered URL that will receive
         real-time event notifications from the Charge API. Developers can
         subscribe to specific events and receive webhook calls when those events
         are triggered.
@@ -2581,8 +2581,7 @@ paths:
                     type: integer
                     description: Maximum timestamp (inclusive)
           description: >
-            A range filter on the `created` timestamp (same format as Stripe’s
-            `created` filter).
+            A range filter on the `created` timestamp.
         - in: query
           name: limit
           required: false
@@ -2777,6 +2776,97 @@ paths:
                 $ref: '#/components/schemas/error'
           description: Error response.
       summary: Detach a driver from a vehicle
+  /drivers/{driver}/transactions:
+    get:
+      summary: List driver’s transactions
+      operationId: getDriversDriverTransactions
+      description: >
+        Returns a paginated list of Transaction objects that belong to the
+        specified driver, sorted by creation date with the most recent
+        transactions first.
+      parameters:
+        - in: path
+          name: driver
+          required: true
+          schema:
+            type: string
+          description: ID of the driver whose transactions you want to list.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of transactions to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items after this transaction ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items before this transaction ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each transaction
+            (for example, `expand[]=charging_session`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Transaction objects for the specified driver, starting after Transaction starting_after. Each entry in data is a separate Transaction object. If no additional transactions are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  data:
+                    type: array
+                    description: Array of Transaction objects.
+                    items:
+                      $ref: '#/components/schemas/transaction'
+                required: [object, url, data]
+        '404':
+          description: Driver not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /drivers/{driver}/vehicles:
     get:
       description: >
@@ -2900,23 +2990,24 @@ paths:
                 - soc_target
       responses:
         '200':
-          description: Estimation successfully created.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/estimation'
+          description: Returns the newly created Estimation object containing the cost breakdown and duration prediction for the requested parameters.
         '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Validation error (e.g., incompatible connector, invalid SoC range).
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Create a cost estimation
   /estimations/{estimation}:
     get:
@@ -2953,23 +3044,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Estimation successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/estimation'
+          description: Returns the Estimation object for a valid identifier. Raises an error if the estimation has expired or the ID is invalid.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Estimation not found or expired.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Error response.
       summary: Retrieve an estimation
   /fleets:
     post:
@@ -3574,6 +3666,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /fleets/{fleet}/transactions:
+    get:
+      summary: List fleet’s transactions
+      operationId: getFleetsFleetTransactions
+      description: >
+        Returns a paginated list of Transaction objects that belong to any
+        driver or vehicle within the specified fleet, sorted by creation date
+        with the most recent transactions first.
+      parameters:
+        - in: path
+          name: fleet
+          required: true
+          schema:
+            type: string
+          description: ID of the fleet whose transactions you want to list.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of transactions to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items after this transaction ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items before this transaction ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each transaction
+            (for example, `expand[]=charging_session`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Transaction objects for the specified fleet, starting after Transaction starting_after. Each entry in data is a separate Transaction object. If no additional transactions are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  data:
+                    type: array
+                    description: Array of Transaction objects.
+                    items:
+                      $ref: '#/components/schemas/transaction'
+                required: [object, url, has_more, data]
+        '404':
+          description: Fleet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /fleets/{fleet}/vehicles/{vehicle}:
     post:
       description: >
@@ -3628,6 +3811,139 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: Add a vehicle to a fleet
+  /transactions:
+    get:
+      summary: List transaction history
+      operationId: getTransactions
+      description: >
+        Returns a paginated list of Transaction objects for your account,
+        sorted by creation date with the most recent transactions first.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of transactions to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items after this transaction ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items before this transaction ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in the response
+            (for example, `expand[]=charging_session`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns a dictionary with a data property that contains an array of up to limit Transaction objects, starting after Transaction starting_after. Each entry in data is a separate Transaction object. If no additional transactions are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  data:
+                    type: array
+                    description: Array of Transaction objects.
+                    items:
+                      $ref: '#/components/schemas/transaction'
+                required: [object, url, has_more, data]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /transactions/{transaction}:
+    get:
+      summary: Retrieve transaction details
+      operationId: getTransactionsTransaction
+      description: >
+        Retrieves a Transaction object by its unique ID.  
+        The response includes amount, currency, payment method, session link,
+        and status metadata.
+      parameters:
+        - in: path
+          name: transaction
+          required: true
+          schema:
+            type: string
+          description: ID of the transaction to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in the response
+            (for example, `expand[]=charging_session`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the Transaction object for a valid identifier. Raises an error otherwise.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/transaction'
+        '404':
+          description: Transaction not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /vehicles:
     post:
       description: >
@@ -3888,8 +4204,7 @@ paths:
                     type: integer
                     description: Maximum timestamp (inclusive)
           description: >
-            Range filter on the `created` timestamp (same format as Stripe’s
-            range queries).
+            Range filter on the `created` timestamp.
         - in: query
           name: limit
           required: false
@@ -4185,34 +4500,24 @@ paths:
               properties: {}
       responses:
         '200':
-          description: Latest telemetry successfully retrieved.
           content:
             application/json:
               schema:
+                description: ''
                 $ref: '#/components/schemas/vehicle_telemetry'
+          description: 	Returns the latest Vehicle Telemetry object for the specified vehicle. Raises an error if no telemetry is available.
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Vehicle or telemetry not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
         default:
-          description: Error response.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /transactions:
-    post:
-      summary: Create a transaction
-      operationId: createTransaction
-      responses:
-        "200":
-          description: A newly created transaction.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/transaction"
+          description: Error response.
   /invoices:
     post:
       summary: Create a invoice
@@ -4246,17 +4551,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/reservation"
-  /webhook_endpoints:
-    post:
-      summary: Create a webhook endpoint
-      operationId: createWebhookEndpoint
-      responses:
-        "200":
-          description: A newly created webhook_endpoint.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/webhook_endpoint"
   /payment_methods:
     post:
       summary: Create a payment method
@@ -4268,3 +4562,298 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/payment_method"
+  /webhook_endpoints:
+    get:
+      summary: List all webhook subscriptions
+      operationId: getWebhookEndpoints
+      description: >
+        Returns a paginated list of your webhook endpoints, sorted by creation
+        date with the most recently created endpoints first.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of endpoints to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items after this endpoint ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items before this endpoint ID.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each endpoint (for example,
+            `expand[]=application`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Webhook Endpoint objects, starting after Endpoint starting_after. Each entry in data is a separate Webhook Endpoint object. If no additional endpoints are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  data:
+                    type: array
+                    description: Array of Webhook Endpoint objects.
+                    items:
+                      $ref: '#/components/schemas/webhook_endpoint'
+                required: [object, url, has_more, data]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Create webhook subscriptions
+      operationId: postWebhookEndpoints
+      description: >
+        Registers a new webhook endpoint so your application can receive
+        real-time events (such as `charge.succeeded`). You must provide the
+        public URL Charge should call and the list of events you want to
+        subscribe to.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: Public HTTPS URL that will receive webhook POSTs.
+                enabled_events:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                  description: >
+                    List of event types to subscribe to
+                    (for example, `"charge.succeeded"`).
+                description:
+                  type: string
+                  description: Optional description for your own reference.
+                api_version:
+                  type: string
+                  description: >
+                    Override the default API version for this endpoint.
+              required:
+                - url
+                - enabled_events
+      responses:
+        '200':
+          description: Returns the newly created Webhook Endpoint object, including a secret property used to sign events.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/webhook_endpoint'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /webhook_endpoints/{webhook_endpoint}:
+    delete:
+      summary: Delete a webhook subscription
+      operationId: deleteWebhookEndpointsWebhookEndpoint
+      description: >
+        Permanently deletes a webhook endpoint.  
+        This action can’t be undone—your application will no longer receive
+        events sent to this URL.
+      parameters:
+        - in: path
+          name: webhook_endpoint
+          required: true
+          schema:
+            type: string
+          description: ID of the webhook endpoint to delete.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the deleted Webhook Endpoint object, including a deleted property set to true.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted webhook endpoint.
+                  object:
+                    type: string
+                    enum: [webhook_endpoint]
+                    description: Always `webhook_endpoint`.
+                  deleted:
+                    type: boolean
+                    description: Always `true`.
+                required: [id, object, deleted]
+        '404':
+          description: Webhook endpoint not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    get:
+      summary: Retrieve a webhook subscription
+      operationId: getWebhookEndpointsWebhookEndpoint
+      description: >
+        Fetches a single webhook endpoint by its unique ID.  
+        The response includes the endpoint URL, list of enabled events, secret,
+        and current delivery status.
+      parameters:
+        - in: path
+          name: webhook_endpoint
+          required: true
+          schema:
+            type: string
+          description: ID of the webhook endpoint to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in the response.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Webhook endpoint successfully retrieved.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/webhook_endpoint'
+        '404':
+          description: Webhook endpoint not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Update a webhook subscription
+      operationId: postWebhookEndpointsWebhookEndpoint
+      description: >
+        Updates the specified webhook endpoint with the parameters you provide.
+        Any parameters not included in the request remain unchanged.
+      parameters:
+        - in: path
+          name: webhook_endpoint
+          required: true
+          schema:
+            type: string
+          description: ID of the webhook endpoint to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                description:
+                  type: string
+                  description: New description for the endpoint.
+                enabled_events:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                  description: >
+                    Full list of event types to subscribe to. Passing an empty
+                    array clears all events.
+                status:
+                  type: string
+                  enum: [enabled, disabled]
+                  description: Enable or disable delivery of events.
+              example:
+                description: "My production webhooks"
+      responses:
+        '200':
+          description: Returns the updated Webhook Endpoint object. Raises an error if the webhook ID is invalid.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/webhook_endpoint'
+        '404':
+          description: Webhook endpoint not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
