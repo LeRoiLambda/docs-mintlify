@@ -1582,7 +1582,7 @@ components:
           type: string
           description: >-
             String representing the object’s type. Always
-            `webhook_admin_endpoint`.
+            `webhook_endpoint`.
           example: null
         api_version:
           type: string
@@ -4530,16 +4530,226 @@ paths:
               schema:
                 $ref: "#/components/schemas/invoice"
   /reports:
-    post:
-      summary: Create a report
-      operationId: createReport
+    get:
+      summary: List all past reports
+      operationId: getReports
+      description: >
+        Returns a paginated list of Report objects you've previously generated,
+        sorted by creation date with the most recent reports first.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of reports to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items after this report ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Cursor for pagination; returns items before this report ID.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [pending, succeeded, failed]
+          description: Filter results by report status.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each report (for example,
+            `expand[]=fleet`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       responses:
-        "200":
-          description: A newly created report.
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Report objects, starting after Report starting_after. Each entry in data is a separate Report object. If no additional reports are available, the array is empty.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/report"
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  data:
+                    type: array
+                    description: Array of Report objects.
+                    items:
+                      $ref: '#/components/schemas/report'
+                required: [object, url, has_more, data]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Create a report generation request
+      operationId: postReports
+      description: >
+        Generates an aggregated analytics report—such as a charging-summary or
+        cost-analysis—based on the parameters you supply.  
+        Report generation is asynchronous: the request immediately returns a
+        Report object with `status=pending`. Poll the **Retrieve a report**
+        endpoint, or listen for the `report.succeeded` webhook, to know when
+        the file is ready for download.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                parameters:
+                  type: object
+                  description: Report configuration payload.
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - charging_summary
+                        - cost_analysis
+                        - usage_breakdown
+                        - fleet_efficiency
+                      description: Kind of report to generate.
+                    period_start:
+                      type: integer
+                      format: unix-time
+                      description: Start of the reporting window (inclusive).
+                    period_end:
+                      type: integer
+                      format: unix-time
+                      description: End of the reporting window (exclusive).
+                    group_by:
+                      type: string
+                      enum: [vehicle, driver, fleet, station]
+                      description: Dimension to group rows by.
+                    filters:
+                      type: object
+                      description: Optional filters (vehicle IDs, driver IDs, etc.).
+                  required:
+                    - type
+                    - period_start
+                    - period_end
+                fleet:
+                  type: string
+                  description: >
+                    Limit the report to a single fleet. Omit to aggregate across
+                    the entire account.
+              example:
+                parameters:
+                  type: "charging_summary"
+                  period_start: 1711929600
+                  period_end:   1714608000
+                fleet: "fleet_12345"
+      responses:
+        '200':
+          description: Returns the newly created Report object. The report’s status is set to pending until generation completes. Use the status field (or the succeeded_at timestamp) to track when the report is ready.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/report'
+        '400':
+          description: Validation error (for example, `period_end` before `period_start`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /reports/{report}:
+    get:
+      summary: Retrieve a report
+      operationId: getReportsReport
+      description: >
+        Fetches a Report object by its unique ID.  
+        Use the `status` field to determine whether the report is ready:
+        `pending`, `succeeded`, or `failed`.  
+        When `status=succeeded`, the `url` property points to the CSV or JSON
+        file, and `size` gives the file size in bytes.
+      parameters:
+        - in: path
+          name: report
+          required: true
+          schema:
+            type: string
+          description: ID of the report to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (for example, `expand[]=fleet`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the Report object for a valid identifier. If the report is still being generated, its status field is pending and url is null. When generation succeeds, status becomes succeeded, succeeded_at is populated, and url contains a downloadable link. Raises an error otherwise.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/report'
+        '404':
+          description: Report not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /reservations:
     post:
       summary: Create a reservation

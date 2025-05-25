@@ -126,7 +126,9 @@
                 "group": "Reports",
                 "pages": [
                   "api/reports/object",
-                  "api/reports/create"
+                  "api/reports/create",
+                  "api/reports/retrieve",
+                  "api/reports/list"
                 ]
               },
               {
