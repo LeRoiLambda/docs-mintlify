@@ -3666,6 +3666,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /fleets/{fleet}/invoices:
+    get:
+      summary: List fleet’s invoices
+      operationId: getFleetsFleetInvoices
+      description: >
+        Returns a paginated list of Invoice objects generated for the specified
+        fleet, sorted by creation date with the most recent invoices first.
+      parameters:
+        - in: path
+          name: fleet
+          required: true
+          schema:
+            type: string
+          description: ID of the fleet whose invoices you want to list.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of invoices to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items after this invoice ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items before this invoice ID.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [draft, open, paid, void, uncollectible]
+          description: Filter results by invoice status.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each invoice
+            (for example, `expand[]=line_items`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Invoice objects belonging to the specified fleet, starting after Invoice starting_after. Each entry in data is a separate Invoice object. If no additional invoices are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    description: Always `list`.
+                    enum: [list]
+                    type: string
+                  url:
+                    description: Endpoint URL for this list.
+                    type: string
+                  has_more:
+                    description: True if additional pages are available.
+                    type: boolean
+                  data:
+                    description: Array of Invoice objects.
+                    items:
+                      $ref: '#/components/schemas/invoice'
+                    type: array
+                required: [object, url, has_more, data]
+        '404':
+          description: Fleet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /fleets/{fleet}/transactions:
     get:
       summary: List fleet’s transactions
@@ -3811,6 +3908,420 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: Add a vehicle to a fleet
+  /invoices:
+    get:
+      summary: List invoices
+      operationId: getInvoices
+      description: >
+        Returns a paginated list of Invoice objects for the authenticated
+        account, sorted by creation date with the most recent invoices first.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of invoices to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items after this invoice ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items before this invoice ID.
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [draft, open, paid, void, uncollectible]
+          description: Filter results by invoice status.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each invoice
+            (for example, `expand[]=line_items`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: A dictionary with a data property that contains an array of up to limit Invoice objects, starting after Invoice starting_after. Each entry in data is a separate Invoice object. If no additional invoices are available, the array is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    description: Always `list`.
+                    enum: [list]
+                    type: string
+                  url:
+                    description: Endpoint URL for this list.
+                    type: string
+                  has_more:
+                    description: True if additional pages are available.
+                    type: boolean
+                  data:
+                    description: Array of Invoice objects.
+                    items:
+                      $ref: '#/components/schemas/invoice'
+                    type: array
+                required: [object, url, has_more, data]
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Create an invoice
+      operationId: postInvoices
+      description: >
+        Generates a draft invoice that groups all transactions within a time
+        window (and, optionally, for a single fleet).  
+        Use the **Finalize an invoice** endpoint to lock line-items and make the
+        invoice ready for payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                period_start:
+                  type: integer
+                  format: unix-time
+                  description: Start of the billing window (inclusive).
+                period_end:
+                  type: integer
+                  format: unix-time
+                  description: End of the billing window (exclusive).
+                fleet:
+                  type: string
+                  description: >
+                    (Optional) Limit the invoice to a single fleet under the
+                    account.
+                description:
+                  type: string
+                  description: Optional memo that appears on the invoice.
+                currency:
+                  type: string
+                  description: >
+                    ISO-4217 currency code (defaults to the account’s
+                    `default_currency`).
+              required:
+                - period_start
+                - period_end
+              example:
+                period_start: 1711929600
+                period_end:   1714608000
+      responses:
+        '200':
+          description: Returns the newly created Invoice object with status set to draft. Line items are generated from the transactions in the requested period, but the invoice isn’t payable until you finalize it.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '400':
+          description: Validation error (for example, period dates reversed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /invoices/{invoice}:
+    get:
+      summary: Retrieve an invoice
+      operationId: getInvoicesInvoice
+      description: >
+        Fetches a single Invoice object by its unique ID.  
+        The response includes line-items, totals, status, and payment details.
+      parameters:
+        - in: path
+          name: invoice
+          required: true
+          schema:
+            type: string
+          description: ID of the invoice to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (for example, `expand[]=line_items`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the Invoice object for a valid identifier. If the invoice is in draft state, totals might change until it’s finalized. Raises an error otherwise.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '404':
+          description: Invoice not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Update an invoice
+      operationId: postInvoicesInvoice
+      description: >
+        Updates the specified Invoice object by setting the values of the
+        parameters provided.  
+        Only invoices in the `draft` or `open` state can be updated.
+      parameters:
+        - in: path
+          name: invoice
+          required: true
+          schema:
+            type: string
+          description: ID of the invoice to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                description:
+                  type: string
+                  description: Human-readable memo that appears on the invoice.
+                due_date:
+                  type: integer
+                  format: unix-time
+                  description: Override the default due date (UNIX timestamp).
+                metadata:
+                  type: object
+                  description: Set of key–value pairs for internal reference.
+              example:
+                description: "April 2024 fleet invoice"
+      responses:
+        '200':
+          description: Returns the updated Invoice object reflecting the supplied changes. Raises an error if the invoice ID is invalid or the invoice is no longer editable (for example, already finalized).
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '400':
+          description: Update not allowed (for example, invoice already finalized).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Invoice not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /invoices/{invoice}/finalize:
+    post:
+      summary: Finalize an invoice
+      operationId: postInvoicesInvoiceFinalize
+      description: >
+        Locks the invoice’s line items, calculates taxes and totals, and changes
+        `status` from `draft` to `open`, making the invoice ready for payment.
+      parameters:
+        - in: path
+          name: invoice
+          required: true
+          schema:
+            type: string
+          description: ID of the draft invoice to finalize.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the Invoice object with status updated to open, line-items locked, and amount_due computed. Raises an error if the invoice is already finalized, void, or paid.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '400':
+          description: Unable to finalize (for example, invoice already finalized or void).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Invoice not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /invoices/{invoice}/pay:
+    post:
+      summary: Pay an invoice
+      operationId: postInvoicesInvoicePay
+      description: >
+        Collects payment for an open invoice using the account’s default payment
+        method (or the `payment_method` you supply).  
+        On success, the invoice’s `status` becomes `paid` and `amount_due` is
+        set to zero.
+      parameters:
+        - in: path
+          name: invoice
+          required: true
+          schema:
+            type: string
+          description: ID of the open invoice to pay.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                payment_method:
+                  type: string
+                  description: >
+                    (Optional) Override the default payment method with a
+                    specific PaymentMethod ID.
+              example:
+                payment_method: "pm_1Nv9F6IJvEtkwdCNYmOCc123"
+      responses:
+        '200':
+          description: Returns the Invoice object with status updated to paid, amount_paid populated, and paid_at set to the payment timestamp. Raises an error if the invoice is already paid, void, or no default payment method is available.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '400':
+          description: Payment failed (for example, card declined or invoice already paid).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Invoice not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /invoices/{invoice}/void:
+    post:
+      summary: Void an invoice
+      operationId: postInvoicesInvoiceVoid
+      description: >
+        Permanently cancels an open or uncollectible invoice.  
+        Once voided, the invoice can’t be paid or edited.
+      parameters:
+        - in: path
+          name: invoice
+          required: true
+          schema:
+            type: string
+          description: ID of the invoice you want to void.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          description: Returns the Invoice object with status updated to void. Voiding an invoice makes it non-payable and unrecoverable for further updates or payments. Raises an error if the invoice is already paid, void, or draft.
+          content:
+            application/json:
+              schema:
+                description: ''
+                $ref: '#/components/schemas/invoice'
+        '400':
+          description: Unable to void (for example, invoice already paid or draft).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Invoice not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
   /transactions:
     get:
       summary: List transaction history
@@ -4518,17 +5029,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
           description: Error response.
-  /invoices:
-    post:
-      summary: Create a invoice
-      operationId: createInvoice
-      responses:
-        "200":
-          description: A newly created invoice.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/invoice"
   /reports:
     get:
       summary: List all past reports

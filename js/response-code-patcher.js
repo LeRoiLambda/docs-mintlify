@@ -11,6 +11,8 @@
             const firstBtn = buttons?.[0]
             if (!firstBtn || firstBtn.tagName === "DIV") return
 
+            firstBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }))
+
             const label = firstBtn.firstElementChild // unique div
             if (!label || label.textContent.trim() === "Response") return
             ;[...buttons].slice(1).forEach((button) => button.remove())

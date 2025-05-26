@@ -112,7 +112,14 @@
                 "group": "Invoices",
                 "pages": [
                   "api/invoices/object",
-                  "api/invoices/create"
+                  "api/invoices/create",
+                  "api/invoices/update",
+                  "api/invoices/retrieve",
+                  "api/invoices/list",
+                  "api/invoices/list_fleet",
+                  "api/invoices/finalize",
+                  "api/invoices/pay",
+                  "api/invoices/void"
                 ]
               },
               {
