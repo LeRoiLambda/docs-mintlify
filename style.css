@@ -27,6 +27,24 @@ In content-area, hide the human-readable status sentence shown
     display: none;
 }
 
+/* Reduce the padding Y of the Attributes */
+#content-area div:has(> :is([id^="schema-"], [id^="body-"], [id^="parameter-"])) {
+    padding: 1.2rem 0;
+}
+
+/* Reduce the gap between Attributes' children */
+#content-area div:has(> :is([id^="schema-"], [id^="body-"], [id^="parameter-"])) > :last-child {
+    margin-top: 0.5rem;
+}
+
+/* Reduce the gap of Attributes requirement */
+#content-area
+    div:has(> :is([id^="schema-"], [id^="body-"], [id^="parameter-"]))
+    > :last-child
+    > :nth-child(2) {
+    margin-top: 1rem;
+}
+
 #content-area > #header + div > div.mt-6.flex.w-full.flex-col.space-y-4 + div {
     margin-top: 2rem;
 }

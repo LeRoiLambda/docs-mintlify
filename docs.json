@@ -27,6 +27,20 @@
                 ]
               },
               {
+                "group": "Charging Sessions",
+                "pages": [
+                  "api/charging_sessions/object",
+                  "api/charging_sessions/create",
+                  "api/charging_sessions/retrieve",
+                  "api/charging_sessions/active_driver",
+                  "api/charging_sessions/active_fleet",
+                  "api/charging_sessions/end",
+                  "api/charging_sessions/list_driver",
+                  "api/charging_sessions/list_fleet",
+                  "api/charging_sessions/list_vehicle"
+                ]
+              },
+              {
                 "group": "Charging Stations",
                 "pages": [
                   "api/charging_stations/object",
@@ -50,6 +64,14 @@
                 ]
               },
               {
+                "group": "Estimations",
+                "pages": [
+                  "api/estimations/object",
+                  "api/estimations/create",
+                  "api/estimations/retrieve"
+                ]
+              },
+              {
                 "group": "Fleets",
                 "pages": [
                   "api/fleets/object",
@@ -57,55 +79,6 @@
                   "api/fleets/update",
                   "api/fleets/retrieve",
                   "api/fleets/delete"
-                ]
-              },
-              {
-                "group": "Menu",
-                "icon": "pen-paintbrush",
-                "pages": [
-                  {
-                    "group": "Charging Sessions",
-                    "pages": [
-                      "api/charging_sessions/object",
-                      "api/charging_sessions/create",
-                      "api/charging_sessions/retrieve",
-                      "api/charging_sessions/active_driver",
-                      "api/charging_sessions/active_fleet",
-                      "api/charging_sessions/end",
-                      "api/charging_sessions/list_driver",
-                      "api/charging_sessions/list_fleet",
-                      "api/charging_sessions/list_vehicle"
-                    ]
-                  },
-                  {
-                    "group": "Estimations",
-                    "pages": [
-                      "api/estimations/object",
-                      "api/estimations/create",
-                      "api/estimations/retrieve"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "Vehicles",
-                "pages": [
-                  "api/vehicles/object",
-                  "api/vehicles/create",
-                  "api/vehicles/update",
-                  "api/vehicles/retrieve",
-                  "api/vehicles/list_driver",
-                  "api/vehicles/delete",
-                  "api/vehicles/attach_fleet",
-                  "api/vehicles/attach_driver",
-                  "api/vehicles/detach_driver"
-                ]
-              },
-              {
-                "group": "Vehicle Telemetries",
-                "pages": [
-                  "api/vehicle_telemetries/object",
-                  "api/vehicle_telemetries/retrieve"
                 ]
               },
               {
@@ -153,6 +126,27 @@
                   "api/transactions/list",
                   "api/transactions/list_driver",
                   "api/transactions/list_fleet"
+                ]
+              },
+              {
+                "group": "Vehicle Telemetries",
+                "pages": [
+                  "api/vehicle_telemetries/object",
+                  "api/vehicle_telemetries/retrieve"
+                ]
+              },
+              {
+                "group": "Vehicles",
+                "pages": [
+                  "api/vehicles/object",
+                  "api/vehicles/create",
+                  "api/vehicles/update",
+                  "api/vehicles/retrieve",
+                  "api/vehicles/list_driver",
+                  "api/vehicles/delete",
+                  "api/vehicles/attach_fleet",
+                  "api/vehicles/attach_driver",
+                  "api/vehicles/detach_driver"
                 ]
               },
               {
