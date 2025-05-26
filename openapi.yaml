@@ -708,7 +708,7 @@ components:
     vehicle_telemetry:
       type: object
       description: >
-        VehicleTelemetry provides real-time insights from a connected electric
+        Vehicle Telemetry provides real-time insights from a connected electric
         vehicle, including battery status, location, firmware version, and
         odometer readings. It is linked to a registered vehicle and regularly
         updated.
@@ -4978,7 +4978,7 @@ paths:
       summary: Get real-time telemetry
       operationId: getVehiclesVehicleTelemetry
       description: >
-        Retrieves the most recent VehicleTelemetry object for the specified
+        Retrieves the most recent Vehicle Telemetry object for the specified
         vehicle.  
         Telemetry includes battery state-of-charge, estimated range, GPS
         coordinates, odometer, and other runtime data points.

@@ -45,6 +45,10 @@ In content-area, hide the human-readable status sentence shown
     margin-top: 1rem;
 }
 
+#content-area div.relative.mt-8.prose.prose-gray > div > div.pt-6.pb-4 {
+    display: none;
+}
+
 #content-area > #header + div > div.mt-6.flex.w-full.flex-col.space-y-4 + div {
     margin-top: 2rem;
 }
