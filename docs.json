@@ -129,13 +129,6 @@
                 ]
               },
               {
-                "group": "Vehicle Telemetries",
-                "pages": [
-                  "api/vehicle_telemetries/object",
-                  "api/vehicle_telemetries/retrieve"
-                ]
-              },
-              {
                 "group": "Vehicles",
                 "pages": [
                   "api/vehicles/object",
@@ -147,6 +140,13 @@
                   "api/vehicles/attach_fleet",
                   "api/vehicles/attach_driver",
                   "api/vehicles/detach_driver"
+                ]
+              },
+              {
+                "group": "Vehicle Telemetries",
+                "pages": [
+                  "api/vehicle_telemetries/object",
+                  "api/vehicle_telemetries/retrieve"
                 ]
               },
               {

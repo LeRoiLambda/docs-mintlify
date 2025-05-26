@@ -658,21 +658,7 @@ components:
           description: List of driver IDs currently linked to the vehicle.
           example: null
         information:
-          type: object
-          description: Manufacturer details for the vehicle.
-          properties:
-            make:
-              type: string
-              description: Vehicle manufacturer or brand (e.g., Tesla, BMW).
-              example: null
-            model:
-              type: string
-              description: Model name of the vehicle.
-              example: null
-            year:
-              type: string
-              description: Model year of the vehicle.
-              example: null
+          $ref: '#/components/schemas/vehicle_information'
         metadata:
           type: object
           description: >-
@@ -706,6 +692,19 @@ components:
             Vehicle Identification Number (VIN), used to uniquely identify the
             vehicle.
           example: null
+    vehicle_information:
+      type: object
+      description: Manufacturer details for the vehicle.
+      properties:
+        make:
+          type: string
+          description: Vehicle manufacturer or brand (e.g., Tesla, BMW).
+        model:
+          type: string
+          description: Model name of the vehicle.
+        year:
+          type: string
+          description: Model year of the vehicle.
     vehicle_telemetry:
       type: object
       description: >
@@ -4481,7 +4480,7 @@ paths:
                   enum: [CCS, CHAdeMO, Type2]
                   description: Primary charging standard supported.
                 information:
-                  $ref: '#/components/schemas/vehicle/properties/information'
+                  $ref: '#/components/schemas/vehicle_information'
                 registration_plate:
                   type: string
                   description: License-plate / registration number.
@@ -4642,7 +4641,7 @@ paths:
                   enum: [CCS, CHAdeMO, Type2]
                   description: Change the primary charging standard.
                 information:
-                  $ref: '#/components/schemas/vehicle/properties/information'
+                  $ref: '#/components/schemas/vehicle_information'
                 registration_plate:
                   type: string
                   description: Update license-plate / registration number.
