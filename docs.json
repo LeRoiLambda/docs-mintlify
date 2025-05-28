@@ -20,144 +20,144 @@
               {
                 "group": "Accounts",
                 "pages": [
-                  "api/accounts/object",
-                  "api/accounts/create",
-                  "api/accounts/update",
-                  "api/accounts/retrieve"
+                  "api-reference/accounts/object",
+                  "api-reference/accounts/create",
+                  "api-reference/accounts/update",
+                  "api-reference/accounts/retrieve"
                 ]
               },
               {
                 "group": "Charging Sessions",
                 "pages": [
-                  "api/charging_sessions/object",
-                  "api/charging_sessions/create",
-                  "api/charging_sessions/retrieve",
-                  "api/charging_sessions/active_driver",
-                  "api/charging_sessions/active_fleet",
-                  "api/charging_sessions/end",
-                  "api/charging_sessions/list_driver",
-                  "api/charging_sessions/list_fleet",
-                  "api/charging_sessions/list_vehicle"
+                  "api-reference/charging_sessions/object",
+                  "api-reference/charging_sessions/create",
+                  "api-reference/charging_sessions/retrieve",
+                  "api-reference/charging_sessions/active_driver",
+                  "api-reference/charging_sessions/active_fleet",
+                  "api-reference/charging_sessions/end",
+                  "api-reference/charging_sessions/list_driver",
+                  "api-reference/charging_sessions/list_fleet",
+                  "api-reference/charging_sessions/list_vehicle"
                 ]
               },
               {
                 "group": "Charging Stations",
                 "pages": [
-                  "api/charging_stations/object",
-                  "api/charging_stations/retrieve",
-                  "api/charging_stations/list"
+                  "api-reference/charging_stations/object",
+                  "api-reference/charging_stations/retrieve",
+                  "api-reference/charging_stations/list"
                 ]
               },
               {
                 "group": "Drivers",
                 "pages": [
-                  "api/drivers/object",
-                  "api/drivers/create",
-                  "api/drivers/update",
-                  "api/drivers/retrieve",
-                  "api/drivers/list_fleet",
-                  "api/drivers/list_vehicle",
-                  "api/drivers/list",
-                  "api/drivers/delete",
-                  "api/drivers/attach",
-                  "api/drivers/detach"
+                  "api-reference/drivers/object",
+                  "api-reference/drivers/create",
+                  "api-reference/drivers/update",
+                  "api-reference/drivers/retrieve",
+                  "api-reference/drivers/list_fleet",
+                  "api-reference/drivers/list_vehicle",
+                  "api-reference/drivers/list",
+                  "api-reference/drivers/delete",
+                  "api-reference/drivers/attach",
+                  "api-reference/drivers/detach"
                 ]
               },
               {
                 "group": "Estimations",
                 "pages": [
-                  "api/estimations/object",
-                  "api/estimations/create",
-                  "api/estimations/retrieve"
+                  "api-reference/estimations/object",
+                  "api-reference/estimations/create",
+                  "api-reference/estimations/retrieve"
                 ]
               },
               {
                 "group": "Fleets",
                 "pages": [
-                  "api/fleets/object",
-                  "api/fleets/create",
-                  "api/fleets/update",
-                  "api/fleets/retrieve",
-                  "api/fleets/delete"
+                  "api-reference/fleets/object",
+                  "api-reference/fleets/create",
+                  "api-reference/fleets/update",
+                  "api-reference/fleets/retrieve",
+                  "api-reference/fleets/delete"
                 ]
               },
               {
                 "group": "Invoices",
                 "pages": [
-                  "api/invoices/object",
-                  "api/invoices/create",
-                  "api/invoices/update",
-                  "api/invoices/retrieve",
-                  "api/invoices/list",
-                  "api/invoices/list_fleet",
-                  "api/invoices/finalize",
-                  "api/invoices/pay",
-                  "api/invoices/void"
+                  "api-reference/invoices/object",
+                  "api-reference/invoices/create",
+                  "api-reference/invoices/update",
+                  "api-reference/invoices/retrieve",
+                  "api-reference/invoices/list",
+                  "api-reference/invoices/list_fleet",
+                  "api-reference/invoices/finalize",
+                  "api-reference/invoices/pay",
+                  "api-reference/invoices/void"
                 ]
               },
               {
                 "group": "Payment Methods",
                 "pages": [
-                  "api/payment_methods/object",
-                  "api/payment_methods/create"
+                  "api-reference/payment_methods/object",
+                  "api-reference/payment_methods/create"
                 ]
               },
               {
                 "group": "Reports",
                 "pages": [
-                  "api/reports/object",
-                  "api/reports/create",
-                  "api/reports/retrieve",
-                  "api/reports/list"
+                  "api-reference/reports/object",
+                  "api-reference/reports/create",
+                  "api-reference/reports/retrieve",
+                  "api-reference/reports/list"
                 ]
               },
               {
                 "group": "Reservations",
                 "pages": [
-                  "api/reservations/object",
-                  "api/reservations/create"
+                  "api-reference/reservations/object",
+                  "api-reference/reservations/create"
                 ]
               },
               {
                 "group": "Transactions",
                 "pages": [
-                  "api/transactions/object",
-                  "api/transactions/retrieve",
-                  "api/transactions/list",
-                  "api/transactions/list_driver",
-                  "api/transactions/list_fleet"
+                  "api-reference/transactions/object",
+                  "api-reference/transactions/retrieve",
+                  "api-reference/transactions/list",
+                  "api-reference/transactions/list_driver",
+                  "api-reference/transactions/list_fleet"
                 ]
               },
               {
                 "group": "Vehicles",
                 "pages": [
-                  "api/vehicles/object",
-                  "api/vehicles/create",
-                  "api/vehicles/update",
-                  "api/vehicles/retrieve",
-                  "api/vehicles/list_driver",
-                  "api/vehicles/delete",
-                  "api/vehicles/attach_fleet",
-                  "api/vehicles/attach_driver",
-                  "api/vehicles/detach_driver"
+                  "api-reference/vehicles/object",
+                  "api-reference/vehicles/create",
+                  "api-reference/vehicles/update",
+                  "api-reference/vehicles/retrieve",
+                  "api-reference/vehicles/list_driver",
+                  "api-reference/vehicles/delete",
+                  "api-reference/vehicles/attach_fleet",
+                  "api-reference/vehicles/attach_driver",
+                  "api-reference/vehicles/detach_driver"
                 ]
               },
               {
                 "group": "Vehicle Telemetries",
                 "pages": [
-                  "api/vehicle_telemetries/object",
-                  "api/vehicle_telemetries/retrieve"
+                  "api-reference/vehicle_telemetries/object",
+                  "api-reference/vehicle_telemetries/retrieve"
                 ]
               },
               {
                 "group": "Webhook Endpoints",
                 "pages": [
-                  "api/webhook_endpoints/object",
-                  "api/webhook_endpoints/create",
-                  "api/webhook_endpoints/update",
-                  "api/webhook_endpoints/retrieve",
-                  "api/webhook_endpoints/list",
-                  "api/webhook_endpoints/delete"
+                  "api-reference/webhook_endpoints/object",
+                  "api-reference/webhook_endpoints/create",
+                  "api-reference/webhook_endpoints/update",
+                  "api-reference/webhook_endpoints/retrieve",
+                  "api-reference/webhook_endpoints/list",
+                  "api-reference/webhook_endpoints/delete"
                 ]
               }
             ]
