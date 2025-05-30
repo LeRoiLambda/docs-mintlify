@@ -2658,73 +2658,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List driver’s charging sessions
-  /drivers/{driver}/charging_sessions/active:
-    get:
-      description: >
-        Returns all **currently active** ChargingSession objects for the
-        specified driver (sessions whose `status` is `active` and have not yet
-        been ended).
-      operationId: getDriversDriverChargingSessionsActive
-      parameters:
-        - in: path
-          name: driver
-          required: true
-          schema:
-            type: string
-          description: ID of the driver to query.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: Fields to expand in each session object.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Active sessions retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_session'
-                  has_more:
-                    type: boolean
-                    description: Always `false`—active list is not paginated
-                  url:
-                    type: string
-                required: [object, data, has_more, url]
-        '404':
-          description: Driver not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List driver’s active charging sessions
   /drivers/{driver}/detach:
     post:
       description: >
@@ -3391,71 +3324,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List fleet’s charging sessions
-  /fleets/{fleet}/charging_sessions/active:
-    get:
-      description: >
-        Returns all active ChargingSession objects across every driver and
-        vehicle in the specified fleet.
-      operationId: getFleetsFleetChargingSessionsActive
-      parameters:
-        - in: path
-          name: fleet
-          required: true
-          schema:
-            type: string
-          description: ID of the fleet to query.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: Fields to expand in each session object.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Active fleet sessions retrieved.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/charging_session'
-                  has_more:
-                    type: boolean
-                    description: Always `false`
-                  url:
-                    type: string
-                required: [object, data, has_more, url]
-        '404':
-          description: Fleet not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List fleet’s active charging sessions
   /fleets/{fleet}/drivers:
     get:
       description: >
@@ -4109,12 +3977,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
     post:
-      summary: Update an invoice
-      operationId: postInvoicesInvoice
       description: >
         Updates the specified Invoice object by setting the values of the
         parameters provided.  
         Only invoices in the `draft` or `open` state can be updated.
+      operationId: postInvoicesInvoice
       parameters:
         - in: path
           name: invoice
@@ -4168,6 +4035,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+      summary: Update an invoice
   /invoices/{invoice}/finalize:
     post:
       summary: Finalize an invoice
@@ -4243,8 +4111,8 @@ paths:
                 payment_method:
                   type: string
                   description: >
-                    (Optional) Override the default payment method with a
-                    specific PaymentMethod ID.
+                    Override the default payment method with a
+                    specific Payment Method ID.
               example:
                 payment_method: "pm_1Nv9F6IJvEtkwdCNYmOCc123"
       responses:
@@ -4321,6 +4189,289 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /payment_methods:
+    get:
+      summary: List payment methods
+      operationId: getPaymentMethods
+      description: >
+        Returns a paginated list of Payment Method objects for the authenticated
+        account, sorted by creation date with the most recent methods first.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of payment methods to return (default 10).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items after this payment-method ID.
+        - in: query
+          name: ending_before
+          required: false
+          schema:
+            type: string
+          description: Pagination cursor; returns items before this payment-method ID.
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [card]
+          description: Filter results by payment-method type.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand in each payment method
+            (for example, `expand[]=driver` or `expand[]=fleet`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum: [list]
+                    description: Always `list`.
+                  data:
+                    type: array
+                    description: Array of Payment Method objects.
+                    items:
+                      description: ''
+                      $ref: '#/components/schemas/payment_method'
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                required: [object, data, has_more, url]
+          description: 'A dictionary with a data property that contains an array of up to limit Payment Method objects, starting after Payment Method starting_after. Each entry in data is a separate Payment Method object. If no additional payment methods are available, the array is empty.'
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Create a Payment Method
+      operationId: postPaymentMethods
+      description: >
+        Creates a new Payment Method object (for example, a credit card). You can later attach
+        this method to a driver or fleet for charging session payments or invoices.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                type:
+                  type: string
+                  enum: [card]
+                  description: The type of payment method (currently only `card` is supported).
+                details:
+                  type: object
+                  description: Card details for the payment method.
+                  properties:
+                    number:
+                      type: string
+                      description: Card number.
+                    exp_month:
+                      type: integer
+                      description: Card expiration month (1–12).
+                    exp_year:
+                      type: integer
+                      description: Card expiration year (four digits).
+                    cvc:
+                      type: string
+                      description: Card verification code.
+                  required: [number, exp_month, exp_year, cvc]
+                billing_details:
+                  type: object
+                  description: Billing details for the cardholder.
+                  properties:
+                    name:
+                      type: string
+                      description: Cardholder's name.
+                    address:
+                      type: object
+                      description: Billing address.
+                      properties:
+                        line1:
+                          type: string
+                        city:
+                          type: string
+                        state:
+                          type: string
+                        postal_code:
+                          type: string
+                        country:
+                          type: string
+              required: [type, details]
+              example:
+                type: "card"
+                details:
+                  number: "4242424242424242"
+                  exp_month: 12
+                  exp_year: 2027
+                  cvc: "123"
+                billing_details:
+                  name: "John Doe"
+                  address:
+                    line1: "123 Elm Street"
+                    city: "Springfield"
+                    state: "IL"
+                    postal_code: "62704"
+                    country: "US"
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: 'Returns the newly created Payment Method object.'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Validation error (for example, invalid card details).
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Error response.
+  /payment_methods/{payment_method}:
+    delete:
+      summary: Delete a Payment Method
+      operationId: deletePaymentMethodsPaymentMethod
+      description: >
+        Permanently removes a payment method from Charge.  
+        This action detaches the token from any drivers or fleets and makes the
+        method unavailable for future payments.
+      parameters:
+        - in: path
+          name: payment_method
+          required: true
+          schema:
+            type: string
+          description: ID of the payment method to delete.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the deleted payment method.
+                  object:
+                    type: string
+                    enum: [payment_method]
+                    description: Always `payment_method`.
+                  deleted:
+                    type: boolean
+                    description: Always `true`.
+                required: [id, object, deleted]
+          description: Returns the deleted Payment Method object, including a deleted property set to true.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Payment method not found.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Error response.
+    get:
+      summary: Retrieve a Payment Method
+      operationId: getPaymentMethodsPaymentMethod
+      description: >
+        Retrieves a single Payment Method object by its unique ID.  
+        The response includes masked card details, billing information, and any
+        current driver or fleet attachment.
+      parameters:
+        - in: path
+          name: payment_method
+          required: true
+          schema:
+            type: string
+          description: ID of the payment method to retrieve.
+        - in: query
+          name: expand
+          style: form
+          explode: true
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: >
+            Specifies related objects to expand (for example, `expand[]=driver`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: 'Returns the Payment Method object for a valid identifier. Raises an error otherwise.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Payment method not found.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Error response.
   /transactions:
     get:
       summary: List transaction history
@@ -5260,17 +5411,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/reservation"
-  /payment_methods:
-    post:
-      summary: Create a payment method
-      operationId: createPaymentMethod
-      responses:
-        "200":
-          description: A newly created payment_method.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/payment_method"
   /webhook_endpoints:
     get:
       summary: List all webhook subscriptions

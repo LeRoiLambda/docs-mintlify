@@ -32,8 +32,6 @@
                   "api-reference/charging_sessions/object",
                   "api-reference/charging_sessions/create",
                   "api-reference/charging_sessions/retrieve",
-                  "api-reference/charging_sessions/active_driver",
-                  "api-reference/charging_sessions/active_fleet",
                   "api-reference/charging_sessions/end",
                   "api-reference/charging_sessions/list_driver",
                   "api-reference/charging_sessions/list_fleet",
@@ -99,7 +97,10 @@
                 "group": "Payment Methods",
                 "pages": [
                   "api-reference/payment_methods/object",
-                  "api-reference/payment_methods/create"
+                  "api-reference/payment_methods/create",
+                  "api-reference/payment_methods/retrieve",
+                  "api-reference/payment_methods/list",
+                  "api-reference/payment_methods/delete"
                 ]
               },
               {
