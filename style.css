@@ -84,7 +84,17 @@ div[id="headlessui-dialog-overlay-:r1:"] + div {
     #navbar + div,
     #navbar-transition + div {
         max-width: none;
-        padding: 0;
+        padding-left: 0;
+        padding-right: min(6.1rem, calc(-1.7rem + 5vw));
+    }
+
+    #navbar-transition + div > div > div > div {
+        padding-left: 2rem;
+        padding-right: 0;
+    }
+
+    #content-area {
+        padding-left: min(calc(23.7rem + 6.1rem), calc(22rem + 5vw));
     }
 
     #sidebar {
@@ -93,24 +103,13 @@ div[id="headlessui-dialog-overlay-:r1:"] + div {
         border-right: rgb(216, 222, 228) 1px solid;
     }
 
+    .dark #sidebar {
+        border-right: rgb(31, 32, 33) 1px solid;
+    }
+
     #sidebar-content {
         top: 4rem;
         padding-bottom: 1rem;
         padding-right: 0;
-    }
-}
-
-@media (min-width: 1280px) {
-    #content-area {
-        padding-left: min(28rem, calc(22rem + 5vw));
-        width: calc(100% - 46rem);
-    }
-
-    #content-side-layout {
-        padding-right: min(6rem, 5vw);
-    }
-
-    #content-side-layout > div {
-        width: min(40rem, 35vw);
     }
 }

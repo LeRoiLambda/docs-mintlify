@@ -13,10 +13,7 @@ components:
   schemas:
     account:
       type: object
-      description: >
-        An Account represents a customer or organization using Charge. This may
-        be a fleet, a mobility platform, or any entity managing vehicles,
-        payments, and charging activity through the Charge API.
+      description: ''
       properties:
         id:
           type: string
@@ -252,11 +249,7 @@ components:
       required: [object, data, has_more, url]
     estimation:
       type: object
-      description: >
-        An Estimation represents a real-time cost preview for a potential
-        charging session. It helps drivers and platforms understand the expected
-        cost and duration of a session before it begins, based on the vehicle's
-        current battery level, charging goal, pricing, and station conditions.
+      description: ''
       properties:
         id:
           type: string
@@ -366,11 +359,7 @@ components:
           example: null
     fleet:
       type: object
-      description: >
-        A Fleet represents a group of vehicles and drivers managed under a
-        single operational unit. Fleets are commonly used by logistics
-        providers, delivery networks, or enterprise customers to organize
-        charging activity, billing, and reporting by group.
+      description: ''
       properties:
         id:
           type: string
@@ -518,10 +507,7 @@ components:
           example: null
     driver:
       type: object
-      description: >
-        A Driver represents an individual authorized to initiate and manage
-        charging sessions. Drivers are typically associated with a fleet or
-        account and are assigned to one or more vehicles.
+      description: ''
       properties:
         id:
           type: string
@@ -623,10 +609,7 @@ components:
           example: null
     vehicle:
       type: object
-      description: >
-        A Vehicle represents an electric vehicle registered within the Charge
-        platform. Vehicles can be linked to one or more drivers, and are used to
-        associate charging sessions, telemetry data, and battery specifications.
+      description: ''
       properties:
         id:
           type: string
@@ -707,11 +690,7 @@ components:
           description: Model year of the vehicle.
     vehicle_telemetry:
       type: object
-      description: >
-        Vehicle Telemetry provides real-time insights from a connected electric
-        vehicle, including battery status, location, firmware version, and
-        odometer readings. It is linked to a registered vehicle and regularly
-        updated.
+      description: ''
       properties:
         id:
           type: string
@@ -801,11 +780,7 @@ components:
               example: null
     charging_station:
       type: object
-      description: >
-        A Charging Station represents a physical location where electric
-        vehicles can connect and charge. It includes both static attributes
-        (location, capabilities) and dynamic data such as real-time connector
-        availability and pricing.
+      description: ''
       properties:
         id:
           type: string
@@ -1016,11 +991,7 @@ components:
           example: null
     charging_session:
       type: object
-      description: >
-        A Charging Session represents a real-time or completed EV charging
-        event. It tracks the energy consumed, session duration, billing
-        information, and associations to a driver, vehicle, charging station,
-        and connector.
+      description: ''
       properties:
         id:
           type: string
@@ -1111,10 +1082,7 @@ components:
           example: null
     transaction:
       type: object
-      description: >
-        A Transaction represents a finalized financial event related to a
-        charging session, such as a charge, refund, or adjustment. Transactions
-        are linked to a driver, session, and payment method.
+      description: ''
       properties:
         id:
           type: string
@@ -1178,10 +1146,7 @@ components:
           example: null
     invoice:
       type: object
-      description: >
-        An Invoice represents a billing statement issued to an account or fleet.
-        It contains line items, payment status, total amounts, and the billing
-        period it covers.
+      description: ''
       properties:
         id:
           type: string
@@ -1256,10 +1221,7 @@ components:
           example: null
     report:
       type: object
-      description: >
-        A Report represents an exported summary of charging activity, usage
-        metrics, or cost breakdowns over a given time period. Reports can be
-        filtered, grouped, and downloaded in CSV or other supported formats.
+      description: ''
       properties:
         id:
           type: string
@@ -1345,13 +1307,7 @@ components:
           example: null
     reservation:
       type: object
-      description: >
-        A Reservation represents a driver's intent to charge within a specific
-        time window and geographic area. Reservations are initially virtual and
-        managed by Charge. Around 30 minutes before the reserved window, Charge
-        attempts to assign a real charging station and lock the reservation.
-        This enables advanced scheduling even when underlying CPOs do not
-        support native future reservations.
+      description: ''
       properties:
         id:
           type: string
@@ -1469,10 +1425,7 @@ components:
           example: null
     payment_method:
       type: object
-      description: >
-        A Payment Method represents a saved way to pay for charging sessions,
-        such as a credit card. It can be attached to a driver, a fleet, or an
-        account and is used during session billing or reservation fees.
+      description: ''
       properties:
         id:
           type: string
@@ -1567,11 +1520,7 @@ components:
           example: null
     webhook_endpoint:
       type: object
-      description: >
-        A Webhook Endpoint represents a registered URL that will receive
-        real-time event notifications from the Charge API. Developers can
-        subscribe to specific events and receive webhook calls when those events
-        are triggered.
+      description: ''
       properties:
         id:
           type: string
