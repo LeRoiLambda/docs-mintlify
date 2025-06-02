@@ -8,7 +8,7 @@
 
         const container = document.getElementById("content-container")
         const lastGroup = container?.querySelector(
-            "#content-container #code-group:last-of-type"
+            "#content-container .code-group:last-of-type"
         )
 
         const tablist = lastGroup.querySelector('[role="tablist"]')
