@@ -53,7 +53,7 @@ components:
                 line2:
                   type: string
                   example: null
-                  description: Second line of the address (optional).
+                  description: Second line of the address.
                 postal_code:
                   type: string
                   example: null
@@ -389,7 +389,7 @@ components:
               example: null
             line2:
               type: string
-              description: Second line of the address (optional).
+              description: Second line of the address.
               example: null
             postal_code:
               type: string
@@ -808,7 +808,7 @@ components:
               example: null
             line2:
               type: string
-              description: Second line of the address (optional).
+              description: Second line of the address.
               example: null
             postal_code:
               type: string
@@ -1307,30 +1307,112 @@ components:
           example: null
     reservation:
       description: >
-        A reservation intent captures a driver’s preferred charging window and location. Initially, reservations are pending, reflecting intent rather than a guaranteed station assignment.
+        The Reservation object represents a driver's intent to charge their  vehicle within a specific time window (`ideal_start`/`ideal_end`) and geographic area (`location`).
 
-        Charge attempts to finalize reservations about 30 minutes before the ideal start. If a suitable station is found, the reservation status updates to confirmed. If no connector is available, the reservation status becomes failed.
-        
-        Timing preferences (ideal_start, ideal_end) are required. Additional flexibility (earliest_start, latest_end) can be provided, helping ensure successful confirmation under variable availability conditions.
-      title: Reservation
-      type: object
-      required:
-        - id
-        - object
-        - status
-        - ideal_start
-        - ideal_end
-        - created
-        - updated
+        Initially, a reservation is in a **pending** state. Charge automatically attempts to assign an available charging station and confirm the reservation approximately 30 minutes before the desired start time. If successful, the reservation status updates to **confirmed**, locking a connector at the assigned charging station.
+
+        If no suitable charging station is available, the reservation status changes to **failed** with a `failed_reason`. Once charging successfully occurs, the reservation status becomes **completed**. Reservations can also be **cancelled** by the driver or automatically **expired** if unused.
       properties:
         id:
           type: string
           description: Unique identifier for the reservation.
-          example: res_456xyz
         object:
           type: string
           enum: [reservation]
-          description: String representing the object’s type—always `reservation`.
+          description: String representing the object's type. Always `reservation`.
+        cancellation_policy:
+          type: object
+          description: Defines conditions for reservation cancellation.
+          properties:
+            free_until_before:
+              type: integer
+              description: Time in seconds before reservation start when cancellation is free.
+            type:
+              type: string
+              enum: [free_cancellation, non_refundable]
+          required: [type]
+        charging_station:
+          type: string
+          nullable: true
+          description: ID of assigned charging station (populated once confirmed).
+        confirmed_at:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Timestamp when reservation status changed to `confirmed`.
+        connector_type:
+          type: array
+          description: Acceptable connector types for charging.
+          items:
+            type: string
+        created:
+          type: integer
+          format: unix-time
+          description: Timestamp when reservation was created.
+        currency:
+          type: string
+          description: ISO currency code for the reservation fee (e.g., `usd`).
+        driver:
+          type: string
+          description: ID of the driver associated with the reservation.
+        earliest_start:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Earliest acceptable reservation start time.
+        failed_reason:
+          type: string
+          nullable: true
+          enum:
+            - no_available_connectors
+            - payment_failed
+            - other
+          description: Reason why reservation failed, if applicable.
+        ideal_end:
+          type: integer
+          format: unix-time
+          description: Ideal reservation end time (requested by driver).
+        ideal_start:
+          type: integer
+          format: unix-time
+          description: Ideal reservation start time (requested by driver).
+        latest_end:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Latest acceptable reservation end time.
+        location:
+          type: object
+          description: Geographic area where reservation is requested.
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+            radius:
+              type: integer
+              description: Radius around the location in meters.
+          required: [latitude, longitude, radius]
+        metadata:
+          type: object
+          description: Custom metadata (key-value pairs).
+          additionalProperties: true
+        payment_method:
+          type: string
+          description: ID of the payment method used for the reservation fee.
+        reservation_fee:
+          type: integer
+          description: Reservation fee amount in smallest currency unit (e.g., cents).
+        reserved_end:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Finalized end time after confirmation.
+        reserved_start:
+          type: integer
+          format: unix-time
+          nullable: true
+          description: Finalized start time after confirmation.
         status:
           type: string
           enum:
@@ -1341,121 +1423,36 @@ components:
             - failed
             - expired
           description: >
-            Current reservation state. `pending` ⇢ `confirmed` (or
-            `failed`) ⇢ `completed` after charging, or `cancelled` / `expired`.
-        failed_reason:
-          type: string
-          nullable: true
-          enum:
-            - no_available_connectors
-            - payment_failed
-            - user_cancelled
-            - internal_error
-          description: Populated when `status` is `failed`, describing why.
-        created:
-          type: integer
-          format: unix-time
-          description: Time the reservation intent was created.
-          example: 1719902545
+            Current status of the reservation.
+
+            - `pending`: Created intent, awaiting confirmation.
+
+            - `confirmed`: Connector reserved successfully.
+
+            - `completed`: Charging session occurred successfully.
+
+            - `cancelled`: Cancelled by driver before start.
+
+            - `failed`: Unable to assign a connector.
+
+            - `expired`: Reservation window passed without use.
         updated:
           type: integer
           format: unix-time
-          description: Last time the reservation object was updated.
-          example: 1719903545
-        confirmed_at:
-          type: integer
-          format: unix-time
-          nullable: true
-          description: Timestamp when the reservation became `confirmed`.
-        driver:
-          type: string
-          nullable: true
-          description: ID of the driver making the reservation.
+          description: Timestamp when reservation was last updated.
         vehicle:
           type: string
-          nullable: true
-          description: ID of the vehicle to be charged.
-        payment_method:
-          type: string
-          nullable: true
-          description: PaymentMethod ID used to hold or capture reservation fees.
-        currency:
-          type: string
-          description: ISO 4217 currency code for any reservation fee.
-          example: usd
-        reservation_fee:
-          type: integer
-          nullable: true
-          description: >
-            Optional flat fee (in the smallest currency unit) charged when
-            the reservation is confirmed.
-        cancellation_policy:
-          type: object
-          description: Rules and grace period for cancelling.
-          properties:
-            type:
-              type: string
-              enum: [free_cancellation, non_refundable]
-              description: Policy category.
-            free_until_before:
-              type: integer
-              nullable: true
-              description: Seconds before `ideal_start` until which cancellation is free.
-          required: [type]
-        location:
-          type: object
-          description: Search radius for matching stations.
-          properties:
-            latitude:  { type: number, format: double }
-            longitude: { type: number, format: double }
-            radius:    { type: integer, description: Radius in metres. }
-          required: [latitude, longitude, radius]
-        connector_type:
-          type: array
-          minItems: 1
-          items:
-            type: string
-            enum: [CHAdeMO, CCS, Type2]
-          description: Acceptable connector types.
-        ideal_start:
-          type: integer
-          format: unix-time
-          description: Preferred start timestamp for charging (required).
-        ideal_end:
-          type: integer
-          format: unix-time
-          description: Preferred end timestamp for charging (required).
-        earliest_start:
-          type: integer
-          format: unix-time
-          nullable: true
-          description: Earliest the driver is willing to start (flexibility).
-        latest_end:
-          type: integer
-          format: unix-time
-          nullable: true
-          description: Latest the driver is willing to finish (flexibility).
-        charging_station:
-          type: string
-          nullable: true
-          description: >
-            ID of the station assigned after confirmation. `null` while
-            `status` is `pending`.
-        reserved_start:
-          type: integer
-          format: unix-time
-          nullable: true
-          description: Finalized start time after confirmation.
-        reserved_end:
-          type: integer
-          format: unix-time
-          nullable: true
-          description: Finalized end time after confirmation.
-        metadata:
-          type: object
-          additionalProperties:
-            type: string
-          description: Key-value pairs for custom use.
+          description: ID of the vehicle associated with the reservation.
+      required:
+        - created
+        - id
+        - ideal_end
+        - ideal_start
+        - object
+        - status
+        - updated
+      title: Reservation
+      type: object
     payment_method:
       type: object
       description: ''
@@ -1490,7 +1487,7 @@ components:
                   example: null
                 line2:
                   type: string
-                  description: Second line of the address (optional).
+                  description: Second line of the address.
                   example: null
                 postal_code:
                   type: string
@@ -5250,8 +5247,8 @@ paths:
       summary: Create a report generation request
       operationId: postReports
       description: >
-        Generates an aggregated analytics report—such as a charging-summary or
-        cost-analysis—based on the parameters you supply.  
+        Generates an aggregated analytics report such as a charging-summary or
+        cost-analysis, based on the parameters you supply.  
         Report generation is asynchronous: the request immediately returns a
         Report object with `status=pending`. Poll the **Retrieve a report**
         endpoint, or listen for the `report.succeeded` webhook, to know when
@@ -5563,8 +5560,8 @@ paths:
       operationId: getReservationsReservation
       description: >
         Retrieves the details of an existing Reservation object.  
-        The response reflects the reservation’s current status—`pending`,
-        `confirmed`, `failed`, and so on—and includes any station assignment
+        The response reflects the reservation’s current status, `pending`,
+        `confirmed`, `failed`, and so on and includes any station assignment
         data if the reservation has been confirmed.
       parameters:
         - in: path
@@ -5679,27 +5676,13 @@ paths:
     post:
       summary: Cancel a reservation
       operationId: postReservationsReservationCancel
-      description: >
-        Cancels a reservation intent or a confirmed reservation.  
-        • If the cancellation occurs before `cancellation_policy.free_until_before`
-        seconds prior to `ideal_start`, any reservation fee is waived.  
-        • If the reservation is already confirmed, the connector lock is
-        released immediately.  
-        Cancelling a reservation emits a `reservation.cancelled` webhook event.
+      description: 'Cancels a reservation intent or a **confirmed** reservation. If the cancellation occurs before `cancellation_policy.free_until_before` seconds prior to `ideal_start`, any reservation fee is waived. If the reservation is already **confirmed**, the connector lock is released immediately.'
       parameters:
         - in: path
           name: reservation
           required: true
           schema: { type: string }
           description: ID of the reservation to cancel.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
       responses:
         '200':
           description: 'Returns the Reservation object with status updated to cancelled. If the request is made after the free-cancellation window or after the reservation is confirmed, the cancellation may incur a fee (reflected in reservation_fee). Raises an error if the reservation is already completed, failed, or expired.'
@@ -5916,7 +5899,7 @@ paths:
       operationId: deleteWebhookEndpointsWebhookEndpoint
       description: >
         Permanently deletes a webhook endpoint.  
-        This action can’t be undone—your application will no longer receive
+        This action can’t be undone, your application will no longer receive
         events sent to this URL.
       parameters:
         - in: path
