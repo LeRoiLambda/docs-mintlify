@@ -116,7 +116,12 @@
                 "group": "Reservations",
                 "pages": [
                   "api-reference/reservations/object",
-                  "api-reference/reservations/create"
+                  "api-reference/reservations/create",
+                  "api-reference/reservations/update",
+                  "api-reference/reservations/retrieve",
+                  "api-reference/reservations/list",
+                  "api-reference/reservations/cancel",
+                  "api-reference/reservations/confirm"
                 ]
               },
               {
