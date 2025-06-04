@@ -4,7 +4,7 @@ div[id^="schema-"] + div > div:has(> span),
 }
 
 /* In content-area, hide the Response's attributes */
-#content-area div:has(> div[id^="response-"]) {
+#content-area div[class*="border-"]:has(> div > div > div[id^="response-"]) {
     display: none;
 }
 
@@ -13,14 +13,6 @@ div[id^="schema-"] + div > div:has(> span),
 #content-area .flex.items-baseline.border-b .font-mono.text-xs > .relative:first-child {
     display: none;
 }
-
-/*
-In content-area, hide the human-readable status sentence shown
-   just below the "Response" heading (e.g. "Driver successfully created.")
-#content-area .text-sm.prose.prose-gray.dark\:prose-invert.mb-2 {
-    display: none;
-}
-*/
 
 /* In content-area, hide any empty sections such as orphaned "Body" blocks */
 #content-area *:has(> *:only-child > * > h4) {
