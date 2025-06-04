@@ -3874,7 +3874,7 @@ paths:
                 fleet:
                   type: string
                   description: >
-                    (Optional) Limit the invoice to a single fleet under the
+                    Limit the invoice to a single fleet under the
                     account.
                 description:
                   type: string
@@ -5766,7 +5766,7 @@ paths:
                 payment_method:
                   type: string
                   description: >
-                    (Optional) Override the reservation’s stored
+                    Override the reservation’s stored
                     `payment_method` before confirmation.
             example:
               payment_method: "pm_12345"
