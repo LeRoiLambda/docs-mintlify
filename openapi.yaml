@@ -2002,6 +2002,14 @@ paths:
         You can filter the results by geographic location and radius, vehicle compatibility,
         availability, proximity, driver favorites, or route-based parameters.
       operationId: getChargingStations
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       parameters:
         - in: query
           name: available
@@ -5387,6 +5395,14 @@ paths:
         Returns a paginated list of Reservation objects, sorted by creation date
         with the most recent reservations first. You can filter by status,
         driver, or vehicle.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       parameters:
         - in: query
           name: limit
@@ -5563,6 +5579,14 @@ paths:
         The response reflects the reservation’s current status, `pending`,
         `confirmed`, `failed`, and so on and includes any station assignment
         data if the reservation has been confirmed.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       parameters:
         - in: path
           name: reservation
@@ -5683,6 +5707,14 @@ paths:
           required: true
           schema: { type: string }
           description: ID of the reservation to cancel.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       responses:
         '200':
           description: 'Returns the Reservation object with status updated to cancelled. If the request is made after the free-cancellation window or after the reservation is confirmed, the cancellation may incur a fee (reflected in reservation_fee). Raises an error if the reservation is already completed, failed, or expired.'
