@@ -192,7 +192,7 @@ components:
         message:
           type: string
           description: Human-readable description of the error.
-          example: "The fleet ID provided does not exist."
+          example: 'The fleet ID provided does not exist.'
         code:
           type: string
           nullable: true
@@ -1722,7 +1722,7 @@ paths:
               schema:
                 description: ''
                 $ref: '#/components/schemas/account'
-          description: 	Returns the Account object for a valid identifier. Raises an error otherwise.
+          description: Returns the Account object for a valid identifier. Raises an error otherwise.
         '404':
           content:
             application/json:
@@ -3889,7 +3889,7 @@ paths:
                 - period_end
               example:
                 period_start: 1711929600
-                period_end:   1714608000
+                period_end: 1714608000
       responses:
         '200':
           description: Returns the newly created Invoice object with status set to draft. Line items are generated from the transactions in the requested period, but the invoice isn’t payable until you finalize it.
@@ -3995,7 +3995,7 @@ paths:
                   type: object
                   description: Set of key–value pairs for internal reference.
               example:
-                description: "April 2024 fleet invoice"
+                description: 'April 2024 fleet invoice'
       responses:
         '200':
           description: Returns the updated Invoice object reflecting the supplied changes. Raises an error if the invoice ID is invalid or the invoice is no longer editable (for example, already finalized).
@@ -4101,7 +4101,7 @@ paths:
                     Override the default payment method with a
                     specific Payment Method ID.
               example:
-                payment_method: "pm_1Nv9F6IJvEtkwdCNYmOCc123"
+                payment_method: 'pm_1Nv9F6IJvEtkwdCNYmOCc123'
       responses:
         '200':
           description: Returns the Invoice object with status updated to paid, amount_paid populated, and paid_at set to the payment timestamp. Raises an error if the invoice is already paid, void, or no default payment method is available.
@@ -4320,20 +4320,20 @@ paths:
                           type: string
               required: [type, details]
               example:
-                type: "card"
+                type: 'card'
                 details:
-                  number: "4242424242424242"
+                  number: '4242424242424242'
                   exp_month: 12
                   exp_year: 2027
-                  cvc: "123"
+                  cvc: '123'
                 billing_details:
-                  name: "John Doe"
+                  name: 'John Doe'
                   address:
-                    line1: "123 Elm Street"
-                    city: "Springfield"
-                    state: "IL"
-                    postal_code: "62704"
-                    country: "US"
+                    line1: '123 Elm Street'
+                    city: 'Springfield'
+                    state: 'IL'
+                    postal_code: '62704'
+                    country: 'US'
       responses:
         '200':
           content:
@@ -5153,7 +5153,7 @@ paths:
               schema:
                 description: ''
                 $ref: '#/components/schemas/vehicle_telemetry'
-          description: 	Returns the latest Vehicle Telemetry object for the specified vehicle. Raises an error if no telemetry is available.
+          description: Returns the latest Vehicle Telemetry object for the specified vehicle. Raises an error if no telemetry is available.
         '404':
           content:
             application/json:
@@ -5307,10 +5307,10 @@ paths:
                     the entire account.
               example:
                 parameters:
-                  type: "charging_summary"
+                  type: 'charging_summary'
                   period_start: 1711929600
-                  period_end:   1714608000
-                fleet: "fleet_12345"
+                  period_end: 1714608000
+                fleet: 'fleet_12345'
       responses:
         '200':
           description: Returns the newly created Report object. The report’s status is set to pending until generation completes. Use the status field (or the succeeded_at timestamp) to track when the report is ready.
@@ -5776,7 +5776,7 @@ paths:
         content:
           application/json:
             example:
-              payment_method: "pm_12345"
+              payment_method: 'pm_12345'
             schema:
               additionalProperties: false
               properties:
@@ -6083,7 +6083,7 @@ paths:
                   enum: [enabled, disabled]
                   description: Enable or disable delivery of events.
               example:
-                description: "My production webhooks"
+                description: 'My production webhooks'
       responses:
         '200':
           description: Returns the updated Webhook Endpoint object. Raises an error if the webhook ID is invalid.

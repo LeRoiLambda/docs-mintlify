@@ -7,9 +7,7 @@
         if (!titlePage) return
 
         const container = document.getElementById("content-container")
-        const lastGroup = container?.querySelector(
-            "#content-container .code-group:last-of-type"
-        )
+        const lastGroup = container?.querySelector("#content-container .code-group:last-of-type")
 
         const tablist = lastGroup.querySelector('[role="tablist"]')
         const buttons = tablist?.querySelectorAll("button")

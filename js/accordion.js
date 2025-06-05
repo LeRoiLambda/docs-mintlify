@@ -18,7 +18,7 @@
                 navRoot.querySelectorAll(".group + ul").forEach((otherUl) => {
                     if (otherUl !== submenu && otherUl.querySelector(":scope > li > a")) {
                         otherUl.previousElementSibling.dispatchEvent(
-                            new MouseEvent("click", { bubbles: true })
+                            new MouseEvent("click", { bubbles: true }),
                         )
                     }
                 })
@@ -36,7 +36,7 @@
                         navRoot.querySelectorAll(".group + ul").forEach((otherUl) => {
                             if (otherUl !== node && otherUl.querySelector(":scope > li > a")) {
                                 otherUl.previousElementSibling.dispatchEvent(
-                                    new MouseEvent("click", { bubbles: true })
+                                    new MouseEvent("click", { bubbles: true }),
                                 )
                             }
                         })
