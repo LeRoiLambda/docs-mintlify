@@ -5389,20 +5389,11 @@ paths:
                 $ref: '#/components/schemas/error'
   /reservations:
     get:
-      summary: List reservations
-      operationId: getReservations
       description: >
-        Returns a paginated list of Reservation objects, sorted by creation date
-        with the most recent reservations first. You can filter by status,
-        driver, or vehicle.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
+        Returns a paginated list of Reservation objects, sorted by creation date with
+        the most recent reservations first. You can filter the results by status,
+        driver, vehicle, or charging station.
+      operationId: getReservations
       parameters:
         - in: query
           name: limit
@@ -5417,32 +5408,38 @@ paths:
           required: false
           schema:
             type: string
-          description: Cursor for pagination; returns items after this reservation ID.
+          description: Pagination cursor; returns reservations after this ID.
         - in: query
           name: ending_before
           required: false
           schema:
             type: string
-          description: Cursor for pagination; returns items before this reservation ID.
+          description: Pagination cursor; returns reservations before this ID.
         - in: query
           name: status
           required: false
           schema:
             type: string
             enum: [pending, confirmed, completed, cancelled, failed, expired]
-          description: Filter results by reservation status.
+          description: Filter reservations by status.
         - in: query
           name: driver
           required: false
           schema:
             type: string
-          description: Filter by driver ID.
+          description: Filter reservations by driver ID.
         - in: query
           name: vehicle
           required: false
           schema:
             type: string
-          description: Filter by vehicle ID.
+          description: Filter reservations by vehicle ID.
+        - in: query
+          name: charging_station
+          required: false
+          schema:
+            type: string
+          description: Filter reservations by charging station ID.
         - in: query
           name: expand
           style: form
@@ -5455,9 +5452,18 @@ paths:
           description: >
             Specifies related objects to expand in each reservation
             (for example, `expand[]=charging_station`).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            example:
+              limit: 3
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
       responses:
         '200':
-          description: 'A dictionary with a data property that contains an array of up to limit Reservation objects, starting after Reservation starting_after. Each entry in data is a separate Reservation object. If no additional reservations are available, the array is empty.'
           content:
             application/json:
               schema:
@@ -5467,131 +5473,124 @@ paths:
                     type: string
                     enum: [list]
                     description: Always `list`.
+                  url:
+                    type: string
+                    description: Endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: True if additional pages are available.
                   data:
                     type: array
                     description: Array of Reservation objects.
                     items:
-                      description: ''
                       $ref: '#/components/schemas/reservation'
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
                 required: [object, data, has_more, url]
+          description: 'A dictionary with a data property that contains an array of up to limit Reservation objects, starting after Reservation starting_after. Each entry in data is a separate Reservation object. If no additional reservations are available, the array is empty.'
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Error response.
+      summary: List reservations
     post:
       description: >
-        Creates a virtual reservation that captures the driver’s preferred
-        charging window, location, and connector requirements.  
-        The reservation starts in a `pending` state. About 30 minutes before
-        `ideal_start`, Charge will attempt to assign a compatible charging
-        station and update the reservation to `confirmed` or `failed`.
+        Creates a reservation intent for charging a vehicle during a specific time
+        window and geographic area. Reservations initially have a `pending` status.
+        Charge will attempt to confirm the reservation approximately 30 minutes before
+        your preferred charging window.
+      operationId: postReservations
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
               additionalProperties: false
-              required:
-                - vehicle
-                - driver
-                - connector_type
-                - location
-                - ideal_start
-                - ideal_end
               properties:
-                vehicle:  { type: string, description: Vehicle ID. }
-                driver:   { type: string, description: Driver ID. }
                 connector_type:
                   type: array
-                  minItems: 1
-                  items: { type: string, enum: [CHAdeMO, CCS, Type2] }
-                location:
-                  type: object
-                  required: [latitude, longitude, radius]
-                  properties:
-                    latitude:  { type: number, format: double }
-                    longitude: { type: number, format: double }
-                    radius:    { type: integer, description: Radius in metres. }
-                ideal_start:
-                  type: integer
-                  format: unix-time
-                ideal_end:
-                  type: integer
-                  format: unix-time
+                  items:
+                    type: string
+                    enum: [CHAdeMO, CCS, Type2]
+                  description: Preferred connector types for charging.
+                driver:
+                  type: string
+                  description: ID of the driver creating the reservation.
                 earliest_start:
                   type: integer
                   format: unix-time
                   nullable: true
+                  description: Earliest acceptable charging start time.
+                ideal_end:
+                  type: integer
+                  format: unix-time
+                  description: Preferred charging end time (UNIX timestamp).
+                ideal_start:
+                  type: integer
+                  format: unix-time
+                  description: Preferred charging start time (UNIX timestamp).
                 latest_end:
                   type: integer
                   format: unix-time
                   nullable: true
+                  description: Latest acceptable charging end time.
+                location:
+                  type: object
+                  properties:
+                    latitude: { type: number, format: double }
+                    longitude: { type: number, format: double }
+                    radius: { type: integer }
+                  required: [latitude, longitude, radius]
+                  description: >
+                    Geographic area within which Charge will attempt to assign a station.
+                metadata:
+                  type: object
+                  description: Custom key-value pairs for integration needs.
                 payment_method:
                   type: string
                   nullable: true
-                metadata:
-                  type: object
-                  additionalProperties: { type: string }
-            example:
-              vehicle: "veh_789xyz"
-              driver:  "drv_789xyz"
-              connector_type: ["CCS"]
-              location:
-                latitude: 64.7254
-                longitude: 12.3356
-                radius: 2000
-              ideal_start: 1711929600
-              ideal_end:   1711933200
+                  description: PaymentMethod ID for reservation fees.
+                vehicle:
+                  type: string
+                  description: ID of the vehicle to charge.
+              required:
+                - driver
+                - connector_type
+                - ideal_end
+                - ideal_start
+                - location
+                - vehicle
+              type: object
+        required: true
       responses:
         '200':
-          description: 'Returns the newly created Reservation object with status set to pending. No station is locked yet; Charge will attempt to confirm the reservation closer to the requested window.'
           content:
             application/json:
               schema:
                 description: ''
                 $ref: '#/components/schemas/reservation'
+          description: 'Returns the newly created Reservation object. Initially, the reservation is in a pending state, indicating your intent. Charge will attempt to confirm the reservation closer to your requested charging window.'
         '400':
-          description: Validation error (for example, end before start).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Invalid input parameters.
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
-      operationId: postReservations
-      summary: Create a reservation
+          description: Unexpected error response.
+      summary: Create a reservation intent
   /reservations/{reservation}:
     get:
-      summary: Retrieve a reservation
-      operationId: getReservationsReservation
       description: >
-        Retrieves the details of an existing Reservation object.  
-        The response reflects the reservation’s current status, `pending`,
-        `confirmed`, `failed`, and so on and includes any station assignment
-        data if the reservation has been confirmed.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
+        Retrieves the details of an existing reservation, including its status,
+        assigned station (if confirmed), timing preferences, and final assigned times.
+      operationId: getReservationsReservation
       parameters:
         - in: path
           name: reservation
           required: true
-          schema: { type: string }
+          schema:
+            type: string
           description: ID of the reservation to retrieve.
         - in: query
           name: expand
@@ -5600,201 +5599,216 @@ paths:
           required: false
           schema:
             type: array
-            items: { type: string }
+            items:
+              type: string
           description: >
-            Specifies related objects to expand
-            (for example, `expand[]=charging_station`).
+            Optional fields to expand in the response, e.g., `expand[]=charging_station`.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties: {}
+              type: object
+        required: false
       responses:
         '200':
-          description: 'Returns the Reservation object for a valid identifier. If the reservation was deleted or never existed, an error is raised.'
           content:
             application/json:
               schema:
                 description: ''
                 $ref: '#/components/schemas/reservation'
+          description: 'Returns the Reservation object for a valid identifier. Raises an error if the reservation ID provided does not exist.'
         '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/error' }
           description: Reservation not found.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/error' }
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Unexpected error.
+      summary: Retrieve a reservation
     post:
-      summary: Update a reservation
-      operationId: postReservationsReservation
       description: >
-        Modifies an existing reservation *intent* before it is confirmed.  
-        You can adjust the preferred time window, location radius, connector
-        types, or payment method. Once the reservation is confirmed (or has
-        otherwise left the `pending` state) these fields become read-only.
+        Updates details of an existing reservation intent. Only reservations with a
+        `pending` status can be modified. You can change timing preferences, location, or connector types.
+      operationId: postReservationsReservation
       parameters:
         - in: path
           name: reservation
           required: true
-          schema: { type: string }
+          schema:
+            type: string
           description: ID of the reservation to update.
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
               additionalProperties: false
+              example:
+                ideal_start: 1711933200
               properties:
-                ideal_start:    { type: integer, format: unix-time }
-                ideal_end:      { type: integer, format: unix-time }
-                earliest_start: { type: integer, format: unix-time, nullable: true }
-                latest_end:     { type: integer, format: unix-time, nullable: true }
+                connector_type:
+                  type: array
+                  items:
+                    type: string
+                    enum: [CHAdeMO, CCS, Type2]
+                  description: Updated acceptable connector types.
+                earliest_start:
+                  type: integer
+                  format: unix-time
+                  nullable: true
+                  description: Updated earliest acceptable start time.
+                ideal_start:
+                  type: integer
+                  format: unix-time
+                  description: Updated preferred start time for charging.
+                ideal_end:
+                  type: integer
+                  format: unix-time
+                  description: Updated preferred end time for charging.
+                latest_end:
+                  type: integer
+                  format: unix-time
+                  nullable: true
+                  description: Updated latest acceptable end time.
                 location:
                   type: object
                   properties:
-                    latitude:  { type: number, format: double }
+                    latitude: { type: number, format: double }
                     longitude: { type: number, format: double }
-                    radius:    { type: integer }
-                connector_type:
-                  type: array
-                  minItems: 1
-                  items: { type: string, enum: [CHAdeMO, CCS, Type2] }
-                payment_method:
-                  type: string
-                  nullable: true
+                    radius: { type: integer }
+                  description: Updated location and search radius.
                 metadata:
                   type: object
                   additionalProperties: { type: string }
-              example:
-                ideal_start: 1711927800
-                ideal_end:   1711931400
-                location:
-                  radius: 2500
+                  description: Custom key-value pairs to attach to this reservation.
+              type: object
+        required: true
       responses:
         '200':
-          description: >
-            Returns the updated Reservation object reflecting the supplied changes.
-            Updates are only allowed while the reservation is in the pending state. Attempts to modify a reservation that is confirmed, failed, cancelled, or expired return an error.
           content:
             application/json:
               schema:
                 description: ''
                 $ref: '#/components/schemas/reservation'
+          description: 'Returns the updated Reservation object reflecting your changes. Raises an error if the reservation is already confirmed, cancelled, or otherwise unmodifiable.'
         '400':
-          description: >
-            Update not allowed (for example, reservation no longer in `pending`
-            state, or invalid time range).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Reservation cannot be modified.
         '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/error' }
           description: Reservation not found.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/error' }
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Unexpected error.
+      summary: Update a reservation
   /reservations/{reservation}/cancel:
     post:
-      summary: Cancel a reservation
+      description: >
+        Cancels a reservation intent. Only reservations with a `pending` or
+        `confirmed` status may be cancelled. Depending on the cancellation policy,
+        a fee may still apply or the reservation may be non-refundable.
       operationId: postReservationsReservationCancel
-      description: 'Cancels a reservation intent or a **confirmed** reservation. If the cancellation occurs before `cancellation_policy.free_until_before` seconds prior to `ideal_start`, any reservation fee is waived. If the reservation is already **confirmed**, the connector lock is released immediately.'
       parameters:
         - in: path
           name: reservation
           required: true
-          schema: { type: string }
+          schema:
+            type: string
           description: ID of the reservation to cancel.
       requestBody:
-        required: false
         content:
           application/json:
             schema:
-              type: object
               additionalProperties: false
               properties: {}
+              type: object
+        required: false
       responses:
         '200':
-          description: 'Returns the Reservation object with status updated to cancelled. If the request is made after the free-cancellation window or after the reservation is confirmed, the cancellation may incur a fee (reflected in reservation_fee). Raises an error if the reservation is already completed, failed, or expired.'
           content:
             application/json:
               schema:
                 description: ''
                 $ref: '#/components/schemas/reservation'
+          description: 'Returns the Reservation object with status updated to cancelled. If the reservation is no longer cancelable (e.g., already confirmed and within a non-refundable window), an error is returned.'
         '400':
-          description: >
-            Cancellation not allowed (for example, reservation already completed
-            or outside cancellation window with non-refundable policy).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Reservation cannot be cancelled (e.g., already expired or completed).
         '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/error' }
           description: Reservation not found.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/error' }
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Unexpected error.
+      summary: Cancel a reservation
   /reservations/{reservation}/confirm:
     post:
-      summary: Confirm a reservation
-      operationId: postReservationsReservationConfirm
       description: >
-        Attempts to finalize a pending reservation intent by assigning an
-        available charging station and locking a compatible connector.  
-        The call is idempotent: repeated requests for the same reservation
-        return the same result.
+        Attempts to confirm a reservation intent by assigning an available charging
+        station and locking a connector. This endpoint is typically called automatically
+        by Charge ~30 minutes before the preferred charging window. The response indicates
+        success (`confirmed`) or failure (`failed`) to assign a suitable station.
+      operationId: postReservationsReservationConfirm
       parameters:
-        - name: reservation
-          in: path
+        - in: path
+          name: reservation
           required: true
-          schema: { type: string }
-          description: ID of the reservation to confirm.
+          schema:
+            type: string
+          description: ID of the reservation intent to confirm.
       requestBody:
-        required: false
         content:
           application/json:
+            example:
+              payment_method: "pm_12345"
             schema:
-              type: object
               additionalProperties: false
               properties:
                 payment_method:
                   type: string
                   description: >
-                    Override the reservation’s stored
-                    `payment_method` before confirmation.
-            example:
-              payment_method: "pm_12345"
+                    ID of the payment method to attach to this Reservation.
+              type: object
+        required: false
       responses:
         '200':
-          description: >
-            Returns the Reservation object with status updated to confirmed (and confirmed_at, charging_station, reserved_start, reserved_end populated) if a compatible connector can be locked.
-            If no connector is available in the requested window, the reservation’s status becomes failed and failed_reason explains why.
           content:
             application/json:
               schema:
-                description: ''
                 $ref: '#/components/schemas/reservation'
+          description: 'Returns the Reservation object with the reservation’s final status. If successful, status is updated to `confirmed`, and a compatible charging station is assigned. If no station is available, the status becomes `failed`, with a **failed_reason** provided.'
         '400':
-          description: Reservation can’t be confirmed (for example, already confirmed or cancelled).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Invalid operation (for example, reservation already confirmed).
         '404':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/error' }
           description: Reservation not found.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/error' }
         default:
-          description: Error response.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/error' }
+          description: Unexpected error.
+      summary: Confirm a reservation
   /webhook_endpoints:
     get:
       summary: List all webhook subscriptions
