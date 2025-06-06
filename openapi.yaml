@@ -1463,6 +1463,27 @@ components:
         object:
           type: string
           description: String representing the object’s type. Always 'payment_method'.
+        bank_account:
+          type: object
+          nullable: true
+          description: Present when type is `bank_account`. Contains bank account-specific details.
+          properties:
+            bank_name:
+              type: string
+              description: Name of the bank.
+            last4:
+              type: string
+              description: Last four digits of the bank account number.
+            country:
+              type: string
+              description: Two-letter ISO country code.
+            currency:
+              type: string
+              description: Three-letter ISO currency code, in lowercase.
+            status:
+              type: string
+              enum: [pending, verified, failed]
+              description: Verification status of the bank account.
         billing_details:
           type: object
           description: Billing information associated with the Payment Method.
@@ -1517,22 +1538,6 @@ components:
               example: null
               nullable: true
               type: string
-        created:
-          type: integer
-          format: unix-time
-          description: Time at which the Payment Method was created. Measured in seconds since the Unix epoch.
-        driver:
-          type: string
-          nullable: true
-          description: ID of the driver this Payment Method is attached to, if any.
-        fleet:
-          type: string
-          nullable: true
-          description: ID of the fleet this Payment Method is attached to, if any.
-        type:
-          type: string
-          enum: [bank_account, card, wallet]
-          description: Type of the Payment Method. One of `card`, `bank_account`, or `wallet`.
         card:
           type: object
           nullable: true
@@ -1550,27 +1555,22 @@ components:
             exp_year:
               type: integer
               description: Card expiration year.
-        bank_account:
-          type: object
+        created:
+          type: integer
+          format: unix-time
+          description: Time at which the Payment Method was created. Measured in seconds since the Unix epoch.
+        driver:
+          type: string
           nullable: true
-          description: Present when type is `bank_account`. Contains bank account-specific details.
-          properties:
-            bank_name:
-              type: string
-              description: Name of the bank.
-            last4:
-              type: string
-              description: Last four digits of the bank account number.
-            country:
-              type: string
-              description: Two-letter ISO country code.
-            currency:
-              type: string
-              description: Three-letter ISO currency code, in lowercase.
-            status:
-              type: string
-              enum: [pending, verified, failed]
-              description: Verification status of the bank account.
+          description: ID of the driver this Payment Method is attached to, if any.
+        fleet:
+          type: string
+          nullable: true
+          description: ID of the fleet this Payment Method is attached to, if any.
+        type:
+          type: string
+          enum: [bank_account, card, wallet]
+          description: Type of the Payment Method. One of `card`, `bank_account`, or `wallet`.
         wallet:
           type: object
           nullable: true
@@ -1587,10 +1587,10 @@ components:
               enum: [active, blocked]
               description: Status of the wallet.
       required:
+        - created
         - id
         - object
         - type
-        - created
       title: Payment Method
       type: object
     webhook_endpoint:
@@ -4467,24 +4467,30 @@ paths:
         Retrieves a list of Payment Methods. You can optionally filter by driver, fleet, or account. The response is paginated and returns up to the specified limit of Payment Method objects.
       operationId: getPaymentMethods
       parameters:
-        - name: driver
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter Payment Methods by driver ID.
-        - name: fleet
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter Payment Methods by fleet ID.
         - name: account
           in: query
           required: false
           schema:
             type: string
           description: Filter Payment Methods by account ID.
+        - name: driver
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter Payment Methods by driver ID.
+        - name: ending_before
+          in: query
+          required: false
+          schema:
+            type: string
+          description: A cursor for pagination; fetches Payment Methods ending before the given ID.
+        - name: fleet
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter Payment Methods by fleet ID.
         - name: limit
           in: query
           required: false
@@ -4500,12 +4506,6 @@ paths:
           schema:
             type: string
           description: A cursor for pagination; fetches Payment Methods starting after the given ID.
-        - name: ending_before
-          in: query
-          required: false
-          schema:
-            type: string
-          description: A cursor for pagination; fetches Payment Methods ending before the given ID.
       requestBody:
         content:
           application/json:
@@ -4554,10 +4554,26 @@ paths:
           application/json:
             schema:
               properties:
-                type:
-                  description: Type of payment method being created.
-                  enum: [card, bank_account, wallet]
-                  type: string
+                bank_account:
+                  type: object
+                  nullable: true
+                  description: Present when type is bank_account. Contains bank account creation fields.
+                  properties:
+                    bank_name:
+                      type: string
+                      description: Name of the bank.
+                    account_number:
+                      type: string
+                      description: Bank account number.
+                    country:
+                      type: string
+                      description: Two-letter ISO country code.
+                    currency:
+                      type: string
+                      description: Three-letter ISO currency code, in lowercase.
+                    routing_number:
+                      type: string
+                      description: Routing number for the bank account.
                 billing_details:
                   type: object
                   description: Billing information associated with the payment method.
@@ -4614,26 +4630,10 @@ paths:
                     - exp_month
                     - exp_year
                     - number
-                bank_account:
-                  type: object
-                  nullable: true
-                  description: Present when type is bank_account. Contains bank account creation fields.
-                  properties:
-                    bank_name:
-                      type: string
-                      description: Name of the bank.
-                    account_number:
-                      type: string
-                      description: Bank account number.
-                    country:
-                      type: string
-                      description: Two-letter ISO country code.
-                    currency:
-                      type: string
-                      description: Three-letter ISO currency code, in lowercase.
-                    routing_number:
-                      type: string
-                      description: Routing number for the bank account.
+                type:
+                  description: Type of payment method being created.
+                  enum: [card, bank_account, wallet]
+                  type: string
                 wallet:
                   type: object
                   nullable: true
@@ -4745,6 +4745,17 @@ paths:
               type: object
               additionalProperties: false
               properties:
+                bank_account:
+                  type: object
+                  nullable: true
+                  description: Fields for updating bank account details, if type is bank_account.
+                  properties:
+                    bank_name:
+                      type: string
+                      description: Updated bank name.
+                    currency:
+                      type: string
+                      description: Updated three-letter ISO currency code, in lowercase.
                 billing_details:
                   type: object
                   description: Updated billing information.
@@ -4791,17 +4802,6 @@ paths:
                     exp_year:
                       type: integer
                       description: New expiration year.
-                bank_account:
-                  type: object
-                  nullable: true
-                  description: Fields for updating bank account details, if type is bank_account.
-                  properties:
-                    bank_name:
-                      type: string
-                      description: Updated bank name.
-                    currency:
-                      type: string
-                      description: Updated three-letter ISO currency code, in lowercase.
       responses:
         '200':
           content:
