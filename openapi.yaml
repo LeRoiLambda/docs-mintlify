@@ -1454,100 +1454,145 @@ components:
       title: Reservation
       type: object
     payment_method:
-      type: object
-      description: ''
+      description: >
+        A Payment Method object represents a saved way to pay for charging sessions, such as a credit card. It can be attached to a driver, a fleet, or an account and is used during session billing or reservation fees.
       properties:
         id:
           type: string
-          description: Unique identifier for the payment method object.
-          example: null
+          description: Unique identifier for the Payment Method object.
         object:
           type: string
-          description: String representing the object’s type. Always `payment_method`.
-          example: null
+          description: String representing the object’s type. Always 'payment_method'.
         billing_details:
           type: object
-          description: Billing contact information associated with the payment method.
+          description: Billing information associated with the Payment Method.
           properties:
             address:
-              type: object
-              description: Billing address of the payment method holder.
+              description: Billing address.
+              nullable: true
               properties:
                 city:
-                  type: string
                   description: City, town, or district.
                   example: null
-                country:
+                  nullable: true
                   type: string
+                country:
                   description: ISO 3166-1 alpha-2 country code (e.g., `US`).
                   example: null
+                  nullable: true
+                  type: string
                 line1:
-                  type: string
-                  description: First line of the street address.
+                  description: First line of the address.
                   example: null
-                line2:
+                  nullable: true
                   type: string
+                line2:
                   description: Second line of the address.
                   example: null
-                postal_code:
+                  nullable: true
                   type: string
+                postal_code:
                   description: ZIP or postal code.
                   example: null
-                state:
+                  nullable: true
                   type: string
+                state:
                   description: State, province, or administrative region.
                   example: null
+                  nullable: true
+                  type: string
+              type: object
             email:
-              type: string
-              description: Email address linked to the billing profile.
+              description: Email address.
               example: null
+              nullable: true
+              type: string
             name:
-              type: string
-              description: Full name of the billing contact.
+              description: Full name.
               example: null
+              nullable: true
+              type: string
             phone:
-              type: string
-              description: Phone number associated with the payment method.
+              description: Billing phone number (including extension).
               example: null
+              nullable: true
+              type: string
         created:
           type: integer
           format: unix-time
-          description: Time at which the payment method was added.
-          example: null
-        details:
-          type: object
-          description: Card or method-specific details (non-sensitive).
-          properties:
-            brand:
-              type: string
-              description: Brand of the card (e.g., `visa`, `mastercard`).
-              example: null
-            last4:
-              type: string
-              description: Last four digits of the card number.
-              example: null
-            exp_month:
-              type: integer
-              description: Card expiration month (1–12).
-              example: null
-            exp_year:
-              type: integer
-              description: Card expiration year.
-              example: null
+          description: Time at which the Payment Method was created. Measured in seconds since the Unix epoch.
         driver:
           type: string
           nullable: true
-          description: ID of the driver this payment method is associated with, if any.
-          example: null
+          description: ID of the driver this Payment Method is attached to, if any.
         fleet:
           type: string
           nullable: true
-          description: ID of the fleet this payment method is associated with, if any.
-          example: null
+          description: ID of the fleet this Payment Method is attached to, if any.
         type:
           type: string
-          description: Type of payment method (e.g., `card`, `wallet`).
-          example: null
+          enum: [bank_account, card, wallet]
+          description: Type of the Payment Method. One of `card`, `bank_account`, or `wallet`.
+        card:
+          type: object
+          nullable: true
+          description: Present when type is `card`. Contains card-specific details.
+          properties:
+            brand:
+              type: string
+              description: Card brand (e.g., 'visa', 'mastercard').
+            last4:
+              type: string
+              description: Last four digits of the card number.
+            exp_month:
+              type: integer
+              description: Card expiration month.
+            exp_year:
+              type: integer
+              description: Card expiration year.
+        bank_account:
+          type: object
+          nullable: true
+          description: Present when type is `bank_account`. Contains bank account-specific details.
+          properties:
+            bank_name:
+              type: string
+              description: Name of the bank.
+            last4:
+              type: string
+              description: Last four digits of the bank account number.
+            country:
+              type: string
+              description: Two-letter ISO country code.
+            currency:
+              type: string
+              description: Three-letter ISO currency code, in lowercase.
+            status:
+              type: string
+              enum: [pending, verified, failed]
+              description: Verification status of the bank account.
+        wallet:
+          type: object
+          nullable: true
+          description: Present when type is `wallet`. Contains wallet-specific details.
+          properties:
+            balance:
+              type: integer
+              description: Current wallet balance, in the smallest currency unit (e.g., cents).
+            currency:
+              type: string
+              description: Three-letter ISO currency code, in lowercase.
+            status:
+              type: string
+              enum: [active, blocked]
+              description: Status of the wallet.
+      required:
+        - id
+        - object
+        - type
+        - created
+      title: Payment Method
+      type: object
     webhook_endpoint:
       type: object
       description: ''
@@ -2695,6 +2740,126 @@ paths:
                 $ref: '#/components/schemas/error'
           description: Error response.
       summary: Detach a driver from a vehicle
+  /drivers/{driver}/payment_methods/{payment_method}:
+    get:
+      description: |
+        Retrieves the details of a specific Payment Method attached to a driver, using both the driver and payment method identifiers.
+      operationId: getDriversDriverPaymentMethodsPaymentMethod
+      parameters:
+        - name: driver
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the driver.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to retrieve.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the Payment Method object for the specified driver and identifier. If either the driver or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The driver or Payment Method was not found.
+      summary: Retrieve a driver’s Payment Method
+  /drivers/{driver}/payment_methods/{payment_method}/attach:
+    post:
+      description: |
+        Attaches an existing Payment Method to the specified driver. After attachment, the driver can use this Payment Method to pay for charging sessions or invoices. A Payment Method can only be attached to one driver or fleet at a time.
+      operationId: postDriversDriverPaymentMethodsPaymentMethodAttach
+      parameters:
+        - name: driver
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the driver.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to attach.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object. If the driver or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The driver or Payment Method was not found.
+      summary: Attach a Payment Method to a Driver
+  /drivers/{driver}/payment_methods/{payment_method}/detach:
+    post:
+      description: |
+        Removes the association between a Payment Method and the specified driver. After detachment, the driver can no longer use this Payment Method for charges or invoices. The Payment Method can be attached to another driver or fleet after detachment.
+      operationId: postDriversDriverPaymentMethodsPaymentMethodDetach
+      parameters:
+        - name: driver
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the driver.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to detach.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object. If the driver or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The driver or Payment Method was not found.
+      summary: Detach a Payment Method from a Driver
   /drivers/{driver}/transactions:
     get:
       summary: List driver’s transactions
@@ -3617,6 +3782,126 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /fleets/{fleet}/payment_methods/{payment_method}:
+    get:
+      description: |
+        Retrieves the details of a specific Payment Method attached to a fleet, using both the fleet and payment method identifiers.
+      operationId: getFleetsFleetPaymentMethodsPaymentMethod
+      parameters:
+        - name: fleet
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the fleet.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to retrieve.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the Payment Method object for the specified fleet and identifier. If either the fleet or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The fleet or Payment Method was not found.
+      summary: Retrieve a fleet’s Payment Method
+  /fleets/{fleet}/payment_methods/{payment_method}/attach:
+    post:
+      description: |
+        Attaches an existing Payment Method to the specified fleet. After attachment, the fleet can use this Payment Method to pay for charging sessions, invoices, or other transactions. A Payment Method can only be attached to one driver or fleet at a time.
+      operationId: postFleetsFleetPaymentMethodsPaymentMethodAttach
+      parameters:
+        - name: fleet
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the fleet.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to attach.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object. If the fleet or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The fleet or Payment Method was not found.
+      summary: Attach a Payment Method to a Fleet
+  /fleets/{fleet}/payment_methods/{payment_method}/detach:
+    post:
+      description: |
+        Removes the association between a Payment Method and the specified fleet. The Payment Method will no longer be available to that fleet.
+      operationId: postFleetsFleetPaymentMethodsPaymentMethodDetach
+      parameters:
+        - name: fleet
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the fleet.
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to detach.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object. If the fleet or Payment Method does not exist, an error is returned.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The fleet or Payment Method was not found.
+      summary: Detach a Payment Method from a Fleet
   /fleets/{fleet}/transactions:
     get:
       summary: List fleet’s transactions
@@ -4178,55 +4463,53 @@ paths:
                 $ref: '#/components/schemas/error'
   /payment_methods:
     get:
-      summary: List payment methods
+      description: |
+        Retrieves a list of Payment Methods. You can optionally filter by driver, fleet, or account. The response is paginated and returns up to the specified limit of Payment Method objects.
       operationId: getPaymentMethods
-      description: >
-        Returns a paginated list of Payment Method objects for the authenticated
-        account, sorted by creation date with the most recent methods first.
       parameters:
-        - in: query
-          name: limit
+        - name: driver
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter Payment Methods by driver ID.
+        - name: fleet
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter Payment Methods by fleet ID.
+        - name: account
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter Payment Methods by account ID.
+        - name: limit
+          in: query
           required: false
           schema:
             type: integer
+            default: 10
             minimum: 1
             maximum: 100
-          description: Maximum number of payment methods to return (default 10).
-        - in: query
-          name: starting_after
+          description: Number of objects to return, up to a maximum of 100.
+        - name: starting_after
+          in: query
           required: false
           schema:
             type: string
-          description: Pagination cursor; returns items after this payment-method ID.
-        - in: query
-          name: ending_before
+          description: A cursor for pagination; fetches Payment Methods starting after the given ID.
+        - name: ending_before
+          in: query
           required: false
           schema:
             type: string
-          description: Pagination cursor; returns items before this payment-method ID.
-        - in: query
-          name: type
-          required: false
-          schema:
-            type: string
-            enum: [card]
-          description: Filter results by payment-method type.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Specifies related objects to expand in each payment method
-            (for example, `expand[]=driver` or `expand[]=fleet`).
+          description: A cursor for pagination; fetches Payment Methods ending before the given ID.
       requestBody:
-        required: false
         content:
           application/json:
+            encoding: {}
             schema:
               type: object
               additionalProperties: false
@@ -4240,202 +4523,158 @@ paths:
                 properties:
                   object:
                     type: string
-                    enum: [list]
-                    description: Always `list`.
+                    example: list
+                    description: String representing the object type; always 'list' for lists.
                   data:
                     type: array
-                    description: Array of Payment Method objects.
                     items:
-                      description: ''
                       $ref: '#/components/schemas/payment_method'
+                    description: Array of Payment Method objects.
                   has_more:
                     type: boolean
-                    description: True if additional pages are available.
+                    description: Indicates if there are more Payment Methods available.
                   url:
                     type: string
-                    description: Endpoint URL for this list.
-                required: [object, data, has_more, url]
-          description: 'A dictionary with a data property that contains an array of up to limit Payment Method objects, starting after Payment Method starting_after. Each entry in data is a separate Payment Method object. If no additional payment methods are available, the array is empty.'
-        default:
-          description: Error response.
+                    description: The URL of this endpoint.
+          description: A dictionary with a data property that contains an array of up to limit Payment Method objects. Each entry in the array is a separate Payment Method object. If no more Payment Methods are available, the resulting array will be empty.
+        '400':
+          description: Invalid request parameters.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+      summary: List Payment Methods
     post:
-      summary: Create a Payment Method
-      operationId: postPaymentMethods
       description: >
-        Creates a new Payment Method object (for example, a credit card). You can later attach
-        this method to a driver or fleet for charging session payments or invoices.
+        Creates a new Payment Method for a driver, fleet, or account. The payment method can be a credit card, bank account, or wallet, and is used for payment of charging sessions and invoices.
+      operationId: postPaymentMethods
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: false
               properties:
                 type:
+                  description: Type of payment method being created.
+                  enum: [card, bank_account, wallet]
                   type: string
-                  enum: [card]
-                  description: The type of payment method (currently only `card` is supported).
-                details:
+                billing_details:
                   type: object
-                  description: Card details for the payment method.
+                  description: Billing information associated with the payment method.
                   properties:
+                    address:
+                      type: object
+                      properties:
+                        city:
+                          type: string
+                          nullable: true
+                        country:
+                          type: string
+                          nullable: true
+                        line1:
+                          type: string
+                          nullable: true
+                        line2:
+                          type: string
+                          nullable: true
+                        postal_code:
+                          type: string
+                          nullable: true
+                        state:
+                          type: string
+                          nullable: true
+                    email:
+                      type: string
+                      format: email
+                      nullable: true
+                    name:
+                      type: string
+                      nullable: true
+                    phone:
+                      type: string
+                      nullable: true
+                card:
+                  type: object
+                  nullable: true
+                  description: Present when type is card. Contains card-specific creation fields.
+                  properties:
+                    cvc:
+                      type: string
+                      description: Card CVC code.
+                    exp_month:
+                      type: integer
+                      description: Card expiration month.
+                    exp_year:
+                      type: integer
+                      description: Card expiration year.
                     number:
                       type: string
                       description: Card number.
-                    exp_month:
-                      type: integer
-                      description: Card expiration month (1–12).
-                    exp_year:
-                      type: integer
-                      description: Card expiration year (four digits).
-                    cvc:
-                      type: string
-                      description: Card verification code.
-                  required: [number, exp_month, exp_year, cvc]
-                billing_details:
+                  required:
+                    - exp_month
+                    - exp_year
+                    - number
+                bank_account:
                   type: object
-                  description: Billing details for the cardholder.
+                  nullable: true
+                  description: Present when type is bank_account. Contains bank account creation fields.
                   properties:
-                    name:
+                    bank_name:
                       type: string
-                      description: Cardholder's name.
-                    address:
-                      type: object
-                      description: Billing address.
-                      properties:
-                        line1:
-                          type: string
-                        city:
-                          type: string
-                        state:
-                          type: string
-                        postal_code:
-                          type: string
-                        country:
-                          type: string
-              required: [type, details]
-              example:
-                type: 'card'
-                details:
-                  number: '4242424242424242'
-                  exp_month: 12
-                  exp_year: 2027
-                  cvc: '123'
-                billing_details:
-                  name: 'John Doe'
-                  address:
-                    line1: '123 Elm Street'
-                    city: 'Springfield'
-                    state: 'IL'
-                    postal_code: '62704'
-                    country: 'US'
+                      description: Name of the bank.
+                    account_number:
+                      type: string
+                      description: Bank account number.
+                    country:
+                      type: string
+                      description: Two-letter ISO country code.
+                    currency:
+                      type: string
+                      description: Three-letter ISO currency code, in lowercase.
+                    routing_number:
+                      type: string
+                      description: Routing number for the bank account.
+                wallet:
+                  type: object
+                  nullable: true
+                  description: Present when type is wallet. Contains wallet creation fields.
+                  properties:
+                    currency:
+                      type: string
+                      description: Currency of the wallet.
+              required:
+                - type
+              type: object
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/payment_method'
-          description: 'Returns the newly created Payment Method object.'
+          description: Returns the newly created Payment Method object.
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-          description: Validation error (for example, invalid card details).
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Error response.
+          description: Invalid request parameters.
+      summary: Create a Payment Method
   /payment_methods/{payment_method}:
     delete:
-      summary: Delete a Payment Method
+      description: |
+        Deletes an existing Payment Method. The Payment Method will no longer be available for use in future charges or invoices. This action is irreversible.
       operationId: deletePaymentMethodsPaymentMethod
-      description: >
-        Permanently removes a payment method from Charge.  
-        This action detaches the token from any drivers or fleets and makes the
-        method unavailable for future payments.
       parameters:
-        - in: path
-          name: payment_method
+        - name: payment_method
+          in: path
           required: true
           schema:
             type: string
-          description: ID of the payment method to delete.
+          description: The unique identifier for the Payment Method to delete.
       requestBody:
-        required: false
         content:
           application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    description: ID of the deleted payment method.
-                  object:
-                    type: string
-                    enum: [payment_method]
-                    description: Always `payment_method`.
-                  deleted:
-                    type: boolean
-                    description: Always `true`.
-                required: [id, object, deleted]
-          description: Returns the deleted Payment Method object, including a deleted property set to true.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Payment method not found.
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Error response.
-    get:
-      summary: Retrieve a Payment Method
-      operationId: getPaymentMethodsPaymentMethod
-      description: >
-        Retrieves a single Payment Method object by its unique ID.  
-        The response includes masked card details, billing information, and any
-        current driver or fleet attachment.
-      parameters:
-        - in: path
-          name: payment_method
-          required: true
-          schema:
-            type: string
-          description: ID of the payment method to retrieve.
-        - in: query
-          name: expand
-          style: form
-          explode: true
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-          description: >
-            Specifies related objects to expand (for example, `expand[]=driver`).
-      requestBody:
-        required: false
-        content:
-          application/json:
+            encoding: {}
             schema:
               type: object
               additionalProperties: false
@@ -4446,19 +4685,143 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/payment_method'
-          description: 'Returns the Payment Method object for a valid identifier. Raises an error otherwise.'
+          description: Returns the deleted Payment Method object if the deletion was successful. If the Payment Method does not exist, an error is returned.
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-          description: Payment method not found.
-        default:
+          description: The Payment Method was not found.
+      summary: Delete a Payment Method
+    get:
+      description: |
+        Retrieves the details of a Payment Method by its unique identifier.
+      operationId: getPaymentMethodsPaymentMethod
+      parameters:
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to retrieve.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the Payment Method object for a valid identifier. If the Payment Method does not exist, an error is returned.
+        '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-          description: Error response.
+          description: The Payment Method was not found.
+      summary: Retrieve a Payment Method
+    post:
+      description: |
+        Updates the details of an existing Payment Method. You can update billing details, or in the case of certain types, refresh metadata such as card expiration dates. Only the provided fields will be updated.
+      operationId: postPaymentMethodsPaymentMethod
+      parameters:
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to update.
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                billing_details:
+                  type: object
+                  description: Updated billing information.
+                  properties:
+                    address:
+                      type: object
+                      properties:
+                        city:
+                          type: string
+                          nullable: true
+                        country:
+                          type: string
+                          nullable: true
+                        line1:
+                          type: string
+                          nullable: true
+                        line2:
+                          type: string
+                          nullable: true
+                        postal_code:
+                          type: string
+                          nullable: true
+                        state:
+                          type: string
+                          nullable: true
+                    email:
+                      type: string
+                      format: email
+                      nullable: true
+                    name:
+                      type: string
+                      nullable: true
+                    phone:
+                      type: string
+                      nullable: true
+                card:
+                  type: object
+                  nullable: true
+                  description: Fields for updating card details, if type is card.
+                  properties:
+                    exp_month:
+                      type: integer
+                      description: New expiration month.
+                    exp_year:
+                      type: integer
+                      description: New expiration year.
+                bank_account:
+                  type: object
+                  nullable: true
+                  description: Fields for updating bank account details, if type is bank_account.
+                  properties:
+                    bank_name:
+                      type: string
+                      description: Updated bank name.
+                    currency:
+                      type: string
+                      description: Updated three-letter ISO currency code, in lowercase.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object. If the Payment Method does not exist, an error is returned.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid request parameters.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: The Payment Method was not found.
+      summary: Update a Payment Method
   /transactions:
     get:
       summary: List transaction history
