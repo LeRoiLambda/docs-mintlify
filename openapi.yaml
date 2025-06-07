@@ -1471,15 +1471,18 @@ components:
             bank_name:
               type: string
               description: Name of the bank.
-            last4:
-              type: string
-              description: Last four digits of the bank account number.
             country:
               type: string
               description: Two-letter ISO country code.
             currency:
               type: string
               description: Three-letter ISO currency code, in lowercase.
+            fingerprint:
+              type: string
+              description: Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same.
+            last4:
+              type: string
+              description: Last four digits of the bank account number.
             status:
               type: string
               enum: [pending, verified, failed]
@@ -1546,15 +1549,18 @@ components:
             brand:
               type: string
               description: Card brand (e.g., 'visa', 'mastercard').
-            last4:
-              type: string
-              description: Last four digits of the card number.
             exp_month:
               type: integer
               description: Card expiration month.
             exp_year:
               type: integer
               description: Card expiration year.
+            fingerprint:
+              type: string
+              description: Uniquely identifies this particular card. You can use this attribute to check whether two cards are the same.
+            last4:
+              type: string
+              description: Last four digits of the card number.
         created:
           type: integer
           format: unix-time
@@ -1582,6 +1588,9 @@ components:
             currency:
               type: string
               description: Three-letter ISO currency code, in lowercase.
+            fingerprint:
+              type: string
+              description: Uniquely identifies this particular wallet. You can use this attribute to check whether two wallets are the same.
             status:
               type: string
               enum: [active, blocked]
