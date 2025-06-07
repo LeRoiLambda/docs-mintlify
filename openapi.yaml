@@ -1576,7 +1576,7 @@ components:
         type:
           type: string
           enum: [bank_account, card, wallet]
-          description: Type of the Payment Method. One of `card`, `bank_account`, or `wallet`.
+          description: The type of the Payment Method. An additional hash is included on the Payment Method with a name matching this value, containing fields specific to that payment method type. For example, if the type is `card`, the Payment Method will include a `card` hash with card-specific details.
         wallet:
           type: object
           nullable: true
