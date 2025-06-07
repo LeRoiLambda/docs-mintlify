@@ -2749,126 +2749,6 @@ paths:
                 $ref: '#/components/schemas/error'
           description: Error response.
       summary: Detach a driver from a vehicle
-  /drivers/{driver}/payment_methods/{payment_method}:
-    get:
-      description: |
-        Retrieves the details of a specific Payment Method attached to a driver, using both the driver and payment method identifiers.
-      operationId: getDriversDriverPaymentMethodsPaymentMethod
-      parameters:
-        - name: driver
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the driver.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to retrieve.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the Payment Method object for the specified driver and identifier. If either the driver or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The driver or Payment Method was not found.
-      summary: Retrieve a driver’s Payment Method
-  /drivers/{driver}/payment_methods/{payment_method}/attach:
-    post:
-      description: |
-        Attaches an existing Payment Method to the specified driver. After attachment, the driver can use this Payment Method to pay for charging sessions or invoices. A Payment Method can only be attached to one driver or fleet at a time.
-      operationId: postDriversDriverPaymentMethodsPaymentMethodAttach
-      parameters:
-        - name: driver
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the driver.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to attach.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the updated Payment Method object. If the driver or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The driver or Payment Method was not found.
-      summary: Attach a Payment Method to a Driver
-  /drivers/{driver}/payment_methods/{payment_method}/detach:
-    post:
-      description: |
-        Removes the association between a Payment Method and the specified driver. After detachment, the driver can no longer use this Payment Method for charges or invoices. The Payment Method can be attached to another driver or fleet after detachment.
-      operationId: postDriversDriverPaymentMethodsPaymentMethodDetach
-      parameters:
-        - name: driver
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the driver.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to detach.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the updated Payment Method object. If the driver or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The driver or Payment Method was not found.
-      summary: Detach a Payment Method from a Driver
   /drivers/{driver}/transactions:
     get:
       summary: List driver’s transactions
@@ -3791,126 +3671,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /fleets/{fleet}/payment_methods/{payment_method}:
-    get:
-      description: |
-        Retrieves the details of a specific Payment Method attached to a fleet, using both the fleet and payment method identifiers.
-      operationId: getFleetsFleetPaymentMethodsPaymentMethod
-      parameters:
-        - name: fleet
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the fleet.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to retrieve.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the Payment Method object for the specified fleet and identifier. If either the fleet or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The fleet or Payment Method was not found.
-      summary: Retrieve a fleet’s Payment Method
-  /fleets/{fleet}/payment_methods/{payment_method}/attach:
-    post:
-      description: |
-        Attaches an existing Payment Method to the specified fleet. After attachment, the fleet can use this Payment Method to pay for charging sessions, invoices, or other transactions. A Payment Method can only be attached to one driver or fleet at a time.
-      operationId: postFleetsFleetPaymentMethodsPaymentMethodAttach
-      parameters:
-        - name: fleet
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the fleet.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to attach.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the updated Payment Method object. If the fleet or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The fleet or Payment Method was not found.
-      summary: Attach a Payment Method to a Fleet
-  /fleets/{fleet}/payment_methods/{payment_method}/detach:
-    post:
-      description: |
-        Removes the association between a Payment Method and the specified fleet. The Payment Method will no longer be available to that fleet.
-      operationId: postFleetsFleetPaymentMethodsPaymentMethodDetach
-      parameters:
-        - name: fleet
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the fleet.
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to detach.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the updated Payment Method object. If the fleet or Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The fleet or Payment Method was not found.
-      summary: Detach a Payment Method from a Fleet
   /fleets/{fleet}/transactions:
     get:
       summary: List fleet’s transactions
@@ -4472,8 +4232,8 @@ paths:
                 $ref: '#/components/schemas/error'
   /payment_methods:
     get:
-      description: |
-        Retrieves a list of Payment Methods. You can optionally filter by driver, fleet, or account. The response is paginated and returns up to the specified limit of Payment Method objects.
+      description: >
+        Returns a list of Payment Methods. Pass either `driver` or `fleet` to scope results; omit both to retrieve all Payment Methods accessible to the authenticated account.
       operationId: getPaymentMethods
       parameters:
         - name: driver
@@ -4481,34 +4241,41 @@ paths:
           required: false
           schema:
             type: string
-          description: Filter Payment Methods by driver ID.
+          description: Limit results to payment methods attached to this driver. Cannot be combined with `fleet`.
         - name: ending_before
           in: query
           required: false
           schema:
             type: string
-          description: A cursor for pagination; fetches Payment Methods ending before the given ID.
+          description: A cursor for pagination. Returns objects listed before the given ID.
         - name: fleet
           in: query
           required: false
           schema:
             type: string
-          description: Filter Payment Methods by fleet ID.
+          description: Limit results to payment methods attached to this fleet. Cannot be combined with `driver`.
         - name: limit
           in: query
           required: false
           schema:
             type: integer
-            default: 10
             minimum: 1
             maximum: 100
-          description: Number of objects to return, up to a maximum of 100.
+            default: 10
+          description: Number of objects to return (default 10, max 100).
         - name: starting_after
           in: query
           required: false
           schema:
             type: string
-          description: A cursor for pagination; fetches Payment Methods starting after the given ID.
+          description: A cursor for pagination. Returns objects listed after the given ID.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [card, bank_account, wallet]
+          description: Filter results by payment method type.
       requestBody:
         content:
           application/json:
@@ -4526,26 +4293,26 @@ paths:
                 properties:
                   object:
                     type: string
-                    example: list
-                    description: String representing the object type; always 'list' for lists.
+                    enum: [list]
+                    description: String representing the object type, always `list`.
+                  url:
+                    type: string
+                    description: The endpoint URL for this list.
+                  has_more:
+                    type: boolean
+                    description: Indicates whether more items are available.
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/payment_method'
-                    description: Array of Payment Method objects.
-                  has_more:
-                    type: boolean
-                    description: Indicates if there are more Payment Methods available.
-                  url:
-                    type: string
-                    description: The URL of this endpoint.
-          description: A dictionary with a data property that contains an array of up to limit Payment Method objects. Each entry in the array is a separate Payment Method object. If no more Payment Methods are available, the resulting array will be empty.
+                    description: An array of Payment Method objects, limited by `limit`.
+          description: A dictionary with a data property that contains an array of up to limit Payment Method objects, starting after Payment Method starting_after. Each entry in data is a separate Payment Method object. If no additional payment methods are available, the array is empty.
         '400':
-          description: Invalid request parameters.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+          description: Invalid request parameters (e.g., both driver and fleet supplied).
       summary: List Payment Methods
     post:
       description: >
@@ -4664,10 +4431,34 @@ paths:
       summary: Create a Payment Method
   /payment_methods/{payment_method}:
     get:
-      description: |
-        Retrieves the details of a Payment Method by its unique identifier.
+      description: >
+        Retrieves a Payment Method by its unique identifier. Optionally scope the request to a driver or fleet by passing either `driver` or `fleet`.
+        If both are omitted, the Payment Method is returned without owner scoping.
       operationId: getPaymentMethodsPaymentMethod
       parameters:
+        - name: driver
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            If provided, the request is scoped to this driver. The API will only return the Payment Method if it belongs to the specified driver.
+        - name: expand[]
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: |
+            Fields to expand in the response.
+        - name: fleet
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            If provided, the request is scoped to this fleet. The API will only return the Payment Method if it belongs to the specified fleet.
         - name: payment_method
           in: path
           required: true
@@ -4688,13 +4479,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/payment_method'
-          description: Returns the Payment Method object for a valid identifier. If the Payment Method does not exist, an error is returned.
+          description: Returns the Payment Method object.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid request parameters (e.g., both driver and fleet supplied, or unsupported expand value).
         '404':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-          description: The Payment Method was not found.
+          description: Payment Method not found, or does not belong to the specified driver or fleet.
       summary: Retrieve a Payment Method
     post:
       description: |
@@ -4792,6 +4589,100 @@ paths:
                 $ref: '#/components/schemas/error'
           description: The Payment Method was not found.
       summary: Update a Payment Method
+  /payment_methods/{payment_method}/attach:
+    post:
+      description: >
+        Attaches an existing Payment Method to a driver or fleet. Provide either `driver` or `fleet` in the request body to specify the target.
+      operationId: postPaymentMethodsPaymentMethodAttach
+      parameters:
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to attach.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                driver:
+                  type: string
+                  description: ID of the driver to attach the Payment Method to. Cannot be combined with `fleet`.
+                fleet:
+                  type: string
+                  description: ID of the fleet to attach the Payment Method to. Cannot be combined with `driver`.
+              additionalProperties: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object with the new attachment. If the Payment Method or target driver or fleet does not exist, an error is returned.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid request parameters (e.g., neither or both `driver` and `fleet` provided).
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Payment Method, driver, or fleet not found.
+      summary: Attach a Payment Method
+  /payment_methods/{payment_method}/detach:
+    post:
+      description: >
+        Detaches a Payment Method from a driver or fleet. Specify either `driver`
+        or `fleet` in the request body. Once detached, the Payment Method is no
+        longer available for that entity’s transactions.
+      operationId: postPaymentMethodsPaymentMethodDetach
+      parameters:
+        - name: payment_method
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier for the Payment Method to detach.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                driver:
+                  type: string
+                  description: ID of the driver to detach the Payment Method from. Cannot be combined with `fleet`.
+                fleet:
+                  type: string
+                  description: ID of the fleet to detach the Payment Method from. Cannot be combined with `driver`.
+              additionalProperties: false
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payment_method'
+          description: Returns the updated Payment Method object reflecting the detachment. If the Payment Method or target driver or fleet does not exist, an error is returned.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Invalid request parameters (e.g., neither or both `driver` and `fleet` provided).
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Payment Method, driver, or fleet not found.
+      summary: Detach a Payment Method
   /transactions:
     get:
       summary: List transaction history
