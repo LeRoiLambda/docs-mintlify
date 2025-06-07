@@ -4660,39 +4660,6 @@ paths:
           description: Invalid request parameters.
       summary: Create a Payment Method
   /payment_methods/{payment_method}:
-    delete:
-      description: |
-        Deletes an existing Payment Method. The Payment Method will no longer be available for use in future charges or invoices. This action is irreversible.
-      operationId: deletePaymentMethodsPaymentMethod
-      parameters:
-        - name: payment_method
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier for the Payment Method to delete.
-      requestBody:
-        content:
-          application/json:
-            encoding: {}
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_method'
-          description: Returns the deleted Payment Method object if the deletion was successful. If the Payment Method does not exist, an error is returned.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: The Payment Method was not found.
-      summary: Delete a Payment Method
     get:
       description: |
         Retrieves the details of a Payment Method by its unique identifier.

@@ -103,7 +103,6 @@
                                     "api-reference/payment_methods/fleet",
                                     "api-reference/payment_methods/retrieve",
                                     "api-reference/payment_methods/list",
-                                    "api-reference/payment_methods/delete",
                                     "api-reference/payment_methods/attach_driver",
                                     "api-reference/payment_methods/attach_fleet",
                                     "api-reference/payment_methods/detach_driver",
