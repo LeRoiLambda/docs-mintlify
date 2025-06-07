@@ -4467,12 +4467,6 @@ paths:
         Retrieves a list of Payment Methods. You can optionally filter by driver, fleet, or account. The response is paginated and returns up to the specified limit of Payment Method objects.
       operationId: getPaymentMethods
       parameters:
-        - name: account
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter Payment Methods by account ID.
         - name: driver
           in: query
           required: false
