@@ -1,9 +1,7 @@
 {
     function changeResponseCode() {
         const container = document.getElementById("content-container")
-        const secondGroups = container?.querySelectorAll(
-            "#content-side-layout .code-group:nth-of-type(2)",
-        )
+        const secondGroups = container?.querySelectorAll(".code-group:nth-of-type(2)")
 
         secondGroups.forEach((secondGroup) => {
             const tablist = secondGroup.querySelector('[role="tablist"]')
