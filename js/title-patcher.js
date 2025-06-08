@@ -40,18 +40,11 @@
 
     refresh()
 
-    const container = document.getElementById("content-container")
-    if (container) {
-        new MutationObserver((mutations) => {
-            for (const m of mutations) {
-                if (m.type === "childList" && (m.addedNodes.length || m.removedNodes.length)) {
-                    refresh()
-                    break
-                }
-            }
-        }).observe(container, {
-            childList: true,
-            subtree: true,
-        })
+    const titleObserver = new MutationObserver(() => {
+        refresh()
+    })
+    const title = document.querySelector("title")
+    if (title) {
+        titleObserver.observe(title, { childList: true })
     }
 }
