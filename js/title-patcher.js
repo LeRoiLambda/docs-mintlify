@@ -40,34 +40,18 @@
 
     refresh()
 
-    window.addEventListener("popstate", () => setTimeout(refresh, 0))
-    ;["pushState", "replaceState"].forEach((name) => {
-        const orig = history[name]
-        history[name] = function (...args) {
-            const res = orig.apply(this, args)
-            setTimeout(refresh, 0)
-            return res
-        }
-    })
-
-    new MutationObserver((records) => {
-        for (const rec of records) {
-            if (rec.type === "childList") {
-                for (const node of rec.addedNodes) {
-                    if (
-                        node.nodeType === 1 &&
-                        (node.id === "code-group" || node.querySelector?.("#code-group"))
-                    ) {
-                        return refresh()
-                    }
+    const container = document.getElementById("content-container")
+    if (container) {
+        new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                if (m.type === "childList" && (m.addedNodes.length || m.removedNodes.length)) {
+                    refresh()
+                    break
                 }
             }
-            if (rec.type === "characterData" && rec.target.parentElement?.id === "page-title") {
-                return refresh()
-            }
-        }
-    }).observe(document.body, {
-        childList: true,
-        subtree: true,
-    })
+        }).observe(container, {
+            childList: true,
+            subtree: true,
+        })
+    }
 }
