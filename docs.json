@@ -53,8 +53,6 @@
                                     "api-reference/drivers/create",
                                     "api-reference/drivers/update",
                                     "api-reference/drivers/retrieve",
-                                    "api-reference/drivers/list_fleet",
-                                    "api-reference/drivers/list_vehicle",
                                     "api-reference/drivers/list",
                                     "api-reference/drivers/delete",
                                     "api-reference/drivers/attach",

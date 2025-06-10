@@ -526,6 +526,11 @@ components:
           type: string
           description: Email address used for login and notifications.
           example: null
+        fleet:
+          description: ID of the fleet this Driver is attached to, if any.
+          example: null
+          nullable: true
+          type: string
         license_number:
           type: string
           nullable: true
@@ -2231,30 +2236,15 @@ paths:
   /drivers:
     get:
       description: >
-        Returns a paginated list of Driver objects, ordered by creation date
-        with the most recent drivers first.
+        Returns a list of Drivers.
       operationId: getDrivers
       parameters:
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of drivers to return (default 10).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns records after this driver ID.
         - in: query
           name: ending_before
           required: false
           schema:
             type: string
-          description: Cursor for pagination; returns records before this driver ID.
+          description: A cursor for pagination. Returns objects listed before the given ID.
         - in: query
           name: expand
           style: form
@@ -2264,8 +2254,33 @@ paths:
             type: array
             items:
               type: string
-          description: >
-            Specifies which fields in each driver object to expand.
+          description: Specifies which fields in each driver object to expand.
+        - name: fleet
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Limit results to drivers attached to this fleet. Cannot be combined with `vehicle`.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Number of objects to return (default 10, max 100).
+        - in: query
+          name: starting_after
+          required: false
+          schema:
+            type: string
+          description: A cursor for pagination. Returns objects listed after the given ID.
+        - name: vehicle
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Limit results to drivers attached to this vehicle. Cannot be combined with `fleet`.
       requestBody:
         required: false
         content:
@@ -3365,84 +3380,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List fleet’s charging sessions
-  /fleets/{fleet}/drivers:
-    get:
-      description: >
-        Returns a paginated list of Driver objects that are currently associated
-        with the specified fleet.
-      operationId: getFleetsFleetDrivers
-      parameters:
-        - in: path
-          name: fleet
-          required: true
-          schema:
-            type: string
-          description: ID of the fleet to retrieve drivers for.
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of drivers to return (default 10).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns drivers after this ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns drivers before this ID.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          description: Successful response with driver list.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  data:
-                    type: array
-                    description: Array of Driver objects.
-                    items:
-                      $ref: '#/components/schemas/driver'
-                  has_more:
-                    type: boolean
-                    description: True if more pages are available.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
-                required: [object, data, has_more, url]
-        '404':
-          description: Fleet not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        default:
-          description: Error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-      summary: List fleet’s drivers
   /fleets/{fleet}/drivers/{driver}:
     post:
       description: >
@@ -4233,7 +4170,7 @@ paths:
   /payment_methods:
     get:
       description: >
-        Returns a list of Payment Methods. Pass either `driver` or `fleet` to scope results; omit both to retrieve all Payment Methods accessible to the authenticated account.
+        Returns a list of Payment Methods.
       operationId: getPaymentMethods
       parameters:
         - name: driver
@@ -5154,137 +5091,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
       summary: List vehicle’s charging sessions
-  /vehicles/{vehicle}/drivers:
-    get:
-      description: >
-        Returns a paginated list of Driver objects currently linked to the
-        specified vehicle.
-      operationId: getVehiclesVehicleIdDrivers
-      parameters:
-        - in: path
-          name: vehicle
-          required: true
-          schema:
-            type: string
-          description: ID of the vehicle whose drivers you want to list.
-        - in: query
-          name: limit
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-          description: Maximum number of drivers to return (default 10).
-        - in: query
-          name: starting_after
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns drivers after this ID.
-        - in: query
-          name: ending_before
-          required: false
-          schema:
-            type: string
-          description: Cursor for pagination; returns drivers before this ID.
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties: {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  object:
-                    type: string
-                    enum: [list]
-                    description: Always `list`.
-                  url:
-                    type: string
-                    description: Endpoint URL for this list.
-                  has_more:
-                    type: boolean
-                    description: True if additional pages are available.
-                  data:
-                    type: array
-                    description: Array of Driver objects attached to the vehicle.
-                    items:
-                      description: ''
-                      $ref: '#/components/schemas/driver'
-                required: [object, data, has_more, url]
-          description: A dictionary with a data property that contains an array of up to limit Vehicle objects attached to the driver, starting after Vehicle starting_after. Each entry in data is a separate Vehicle object. If no additional vehicles are available, the array is empty.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Vehicle not found.
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Error response.
-      summary: List vehicle’s drivers
-    post:
-      description: >
-        Links an existing Driver to the specified Vehicle.  
-        Once attached, the driver will appear in the vehicle’s `drivers` array
-        and future charging sessions will attribute the driver.
-      operationId: postVehiclesVehicleDriversAttach
-      parameters:
-        - in: path
-          name: vehicle
-          required: true
-          schema:
-            type: string
-          description: ID of the vehicle that the driver will operate.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                driver:
-                  type: string
-                  description: ID of the driver to attach.
-              required: [driver]
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: ''
-                $ref: '#/components/schemas/vehicle'
-          description: Returns the Vehicle object now containing the attached driver in its drivers array.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Vehicle or driver not found.
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Driver already attached to the vehicle.
-        default:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-          description: Error response.
-      summary: Attach a vehicle to a driver
   /vehicles/{vehicle}/drivers/{driver}/detach:
     post:
       description: >
