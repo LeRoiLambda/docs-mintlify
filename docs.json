@@ -141,11 +141,10 @@
                                     "api-reference/vehicles/create",
                                     "api-reference/vehicles/update",
                                     "api-reference/vehicles/retrieve",
-                                    "api-reference/vehicles/list_driver",
+                                    "api-reference/vehicles/list",
                                     "api-reference/vehicles/delete",
-                                    "api-reference/vehicles/attach_fleet",
-                                    "api-reference/vehicles/attach_driver",
-                                    "api-reference/vehicles/detach_driver"
+                                    "api-reference/vehicles/attach",
+                                    "api-reference/vehicles/detach"
                                 ]
                             },
                             {
